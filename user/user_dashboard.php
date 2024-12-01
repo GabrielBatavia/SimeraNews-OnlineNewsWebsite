@@ -2,8 +2,9 @@
 // admin_dashboard.php (Admin Panel)
 
 session_start();
-if (!isset($_SESSION['admin_logged_in'])) {
-    header('Location: login.php');
+session_start();
+if (!isset($_SESSION['user_logged_in'])) {
+    header('Location: ../login.php');
     exit;
 }
 
@@ -35,7 +36,6 @@ $articles = $newsCollection->find();
 <div class="container mt-4">
     <h2>Admin Dashboard</h2>
     <a href="add_article.php" class="btn btn-success mb-3">Add New Article</a>
-    <a href="admin_dashboard.php?logout=true" class="btn btn-danger mb-3">Logout</a>
     <table class="table">
         <thead>
             <tr>
