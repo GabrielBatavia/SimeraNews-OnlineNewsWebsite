@@ -1,7 +1,5 @@
 <?php
-// admin_dashboard.php (Admin Panel)
-
-session_start();
+// user
 session_start();
 if (!isset($_SESSION['user_logged_in'])) {
     header('Location: ../login.php');
@@ -9,13 +7,12 @@ if (!isset($_SESSION['user_logged_in'])) {
 }
 
 if (isset($_GET['logout'])) {
-    session_start(); 
-    session_unset(); 
-    session_destroy(); 
-    header('Location: ../login.php'); 
-    exit;                  
+    // Destroy the existing session
+    session_unset();    // Clear all session variables
+    session_destroy();  // Destroy the session
+    header('Location: ../login.php');  // Redirect to login page
+    exit;               
 }
-
 
 require '../includes/db.php'; // MongoDB connection
 
@@ -36,6 +33,7 @@ $articles = $newsCollection->find();
 <div class="container mt-4">
     <h2>Admin Dashboard</h2>
     <a href="add_article.php" class="btn btn-success mb-3">Add New Article</a>
+    <a href="user_dashboard.php?logout=true" class="btn btn-danger mb-3">Logout</a>
     <table class="table">
         <thead>
             <tr>

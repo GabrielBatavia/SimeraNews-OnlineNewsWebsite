@@ -19,7 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $adminPassword = 'password123';  // Never store plaintext passwords in production!
 
     $userUsername = 'user';
-    $userPass = 'userpass123';
+    $userPassword = 'userpass123';  // Corrected variable name
 
     // Check the provided credentials
     if ($_POST['username'] == $adminUsername && $_POST['password'] == $adminPassword) {
@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $error = "Invalid username or password.";
     }
 }
+
 ?>
 
 
