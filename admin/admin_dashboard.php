@@ -7,209 +7,195 @@ if (!isset($_SESSION['admin_logged_in'])) {
     exit;
 }
 
-if (isset($_GET['logout'])) {
-    session_start(); 
-    session_unset(); 
-    session_destroy(); 
-    header('Location: ../login.php'); 
-    exit;                  
-}
-
-
 require '../includes/db.php'; // MongoDB connection
 
-// Fetch articles from MongoDB
-$articles = $newsCollection->find();
+// Handle category filter
+$filter = [];
+$selectedCategory = '';
+if (isset($_GET['category']) && $_GET['category'] !== '') {
+    $selectedCategory = $_GET['category'];
+    $filter['category'] = $selectedCategory;
+}
 
-$searchQuery = isset($_GET['search']) ? ['$text' => ['$search' => $_GET['search']]] : [];
-$articles = $newsCollection->find($searchQuery, ['limit' => 10, 'sort' => ['created_at' => -1]]);
+// Fetch distinct categories for the filter dropdown
+$categories = $newsCollection->distinct('category');
+
+// Fetch articles from MongoDB based on filter
+$articles = $newsCollection->find($filter);
 ?>
-
 <!DOCTYPE html>
-<html lang="en">
-
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>News Portal</title>
+    <title>Admin Dashboard</title>
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../public/style-index.css">
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .navbar {
+            margin-bottom: 20px;
+        }
+        .dataTables_filter {
+            display: none; /* Hide default search */
+        }
+    </style>
 </head>
-
 <body>
 
-    <div class="sidebar">
-        <div class="sidebar-logo">
-            <img src="../asset/icon/app-logo.png" alt="logo">
-            <p>Simera News</p>
-        </div>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="#">Admin Dashboard</a>
+    <div class="d-flex">
+      <a href="logout.php" class="btn btn-outline-light">Logout</a>
+    </div>
+  </div>
+</nav>
 
-        <div class="profile">
-            <img src="../asset/icon/person.jpg" alt="">
-            <p>
-                <span class="nama-header">Mahmoed</span><br>
-                <span class="status-header">Admin</span>
-            </p>
-        </div>
-        
-        <ul class="sidebar-menu">
-            <li>
-                <div class="divider"></div>
-            </li>
-            <li><img src="../asset/icon/house.svg" alt=""><a href="#"><span>Home</span></a></li>
-            <li><img src="../asset/icon/sparkle.svg" alt=""><a href="#"><span>For You</span></a></li>
-            <li><img src="../asset/icon/stack.svg" alt=""><a href="#"><span>Following</span></a></li>
-            <li><img src="../asset/icon/lightbulb.svg" alt=""><a href="#"><span>Suggestion</span></a></li>
-
-            <!-- Dropdown Menu for Admin -->
-            <li class="dropdown">
-                <img src="../asset/icon/pencil-square.svg" alt="">
-                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><span>Admin Settings</span></a>
-                <ul class="dropdown-menu p-0 m-0">
-                    <li><a href="./add_article.php" class="dropdown-item p-2 m-0">Create News</a></li>
-                    <li><a href="./manage_article.php" class="dropdown-item p-2 m-0">Manage News</a></li>
-                </ul>
-            </li>
-
-            <li><img src="../asset/icon/box-arrow-left.svg" alt=""><a href="admin_dashboard.php?logout=true"><span>Log out</span></a></li>
-            <div class="divider"></div>
-
-        </ul>
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2>Manajemen Artikel</h2>
+        <a href="add_article.php" class="btn btn-success">Tambah Artikel Baru</a>
     </div>
 
-
-    <div class="content">
-        <!-- Navbar -->
-        <div class="navbar">
-            <img src="../asset/icon/list.svg" id="menu-toggle" alt="">
-            <div class="nav-btn-group">
-                <ul>
-                    <li class="nav-btn active">Top Stories</li>
-                    <li class="nav-btn">For You</li>
-                    <li class="nav-btn">Your Topics</li>
-                    <li class="nav-btn">Fast Check</li>
-                    <li class="nav-btn">More</li>
-                </ul>
-            </div>
-            <div class="search-etc">
-                <img src="../asset/icon/bell.svg" alt="">
-                <div class="separator" style="height: 20px; width: 1px; background-color: #D2D2D2"></div>
-                <img src="../asset/icon/chats.svg" alt="">
-                <div class="search-bar">
-                    <img src="../asset/icon/search.svg" alt="">
-                    <input type="text" placeholder="Search" class="search-bar" name="search" id="search-query" value="<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>">
-                </div>
-            </div>
+    <?php if (isset($_SESSION['message'])): ?>
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            <?php 
+                echo htmlspecialchars($_SESSION['message']); 
+                unset($_SESSION['message']);
+            ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
         </div>
+    <?php endif; ?>
 
-        <div class="main-content">
-            <div class="main-content-news container mt-3">
-
-                <!-- Search Bar -->
-                <!-- <form method="GET" action="index.php" id="search-form">
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" name="search" id="search-query"
-                            placeholder="Search news..." value="<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>">
-                        <button class="btn btn-primary" type="submit">Search</button>
-                    </div>
-                </form> -->
-
-                <!-- Display Articles -->
-                <div class="row" id="search-results">
-                    <?php
-                    require '../includes/db.php'; // Include DB connection
-
-                    $searchQuery = isset($_GET['search']) ? ['$text' => ['$search' => $_GET['search']]] : [];
-                    $articles = $newsCollection->find($searchQuery, ['limit' => 10, 'sort' => ['created_at' => -1]]);  // Fetch articles
-                    // Mengambil dokumen terakhir berdasarkan created_at
-                    $lastArticle = $newsCollection->findOne([], ['sort' => ['created_at' => -1]]);
-
-                    echo "<a href='view.php?id=" . htmlspecialchars($lastArticle['_id']) . "' class='text-decoration-none text-reset'>";
-                    echo "<div class='card'>";
-                    echo "<div class='main-news card-body'>";
-                    echo "<p class='card-title'>Card Title</p>";
-                    echo "<h5 class='card-text'>This is a wider card with supporting text below as a natural lead-in to additional content. We'll add an image below!</h5>";
-                    echo "<div class='line'></div>";
-                    echo "<div class='footer-card'>";
-                    echo "<p>tanggaaaaaal</p>";
-                    echo "<div class='right'>";
-                    echo "<img src='../asset/icon/heart.svg' alt='' style='width: 20px; height: 20px; margin-right: 10px;'>";
-                    echo "<img src='../asset/icon/share.svg' alt='' style='width: 20px; height: 20px;'>";
-                    echo "</div>";
-                    echo "</div>";
-                    echo "</div>";
-                    echo "</div>";
-                    echo "</a>";
-
-                    foreach ($articles as $article) {
-                        echo "<div class='col-12 col-md-6 col-lg-4 mt-3'>";  // Make it responsive
-                        echo "<div class='card article-card'>";
-                        echo "<img src='" . htmlspecialchars('../asset/icon/person.jpg') . "' class='card-img-top' alt='Card image' style='height: 200px; object-fit: cover;'>"; // Add the image
-                        echo "<div class='card-body'>";
-                        echo "<h5 class='card-title'>" . htmlspecialchars($article['title']) . "</h5>";
-                        echo "<p class='card-text'>" . htmlspecialchars($article['summary']) . "</p>";
-                        echo "<p><small>Published: " . $article['created_at']->toDateTime()->format('Y-m-d H:i') . "</small></p>";
-                        echo "</div>";
-                        echo "<div class='card-footer d-flex justify-content-between align-items-center'>";
-                        echo "<span class='text-muted'>" . htmlspecialchars($article['author']) . "</span>"; // Assuming there's an author
-                        echo "<a href='view.php?id=" . $article['_id'] . "' class='btn btn-link p-0'>Read More</a>";
-                        echo "</div>";
-                        echo "</div>";
-                        echo "</div>";
-                    }
-                    ?>
-                </div>
-
-            </div>
-            <div class="recommendation-content">
-                <div class="col-12 mt-3"> <!-- Make it responsive -->
-                    <div class="card article-card">
-                        <div class="card-header bg-white">
-                            Trending News
-                        </div>
-                        <div class="card-body">
-                            <h5 class="card-title"><?php echo htmlspecialchars($lastArticle['title']); ?></h5>
-                            <p class="card-text"><?php echo htmlspecialchars($lastArticle['summary']); ?></p>
-                            <p><small>Published: <?php echo $lastArticle['created_at']->toDateTime()->format('Y-m-d H:i'); ?></small></p>
-                            <a href="view.php?id=<?php echo $lastArticle['_id']; ?>" class="btn btn-primary">Read More</a>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
+    <!-- Filter dan Search -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <select id="categoryFilter" class="form-select">
+                <option value="">Semua Kategori</option>
+                <?php foreach ($categories as $category): ?>
+                    <option value="<?php echo htmlspecialchars($category); ?>" <?php echo ($selectedCategory === $category) ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($category); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="col-md-4">
+            <input type="text" id="articleSearch" class="form-control" placeholder="Cari Artikel...">
         </div>
     </div>
 
-    <!-- Bootstrap JS & jQuery -->
-    <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Tabel Artikel -->
+    <table id="articlesTable" class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Judul</th>
+                <th>Kategori</th>
+                <th>Penulis</th>
+                <th>Dibuat Pada</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php
+            $counter = 1;
+            foreach ($articles as $article) {
+                echo "<tr>";
+                echo "<td>{$counter}</td>";
+                echo "<td>" . htmlspecialchars($article['title']) . "</td>";
+                echo "<td>" . htmlspecialchars($article['category']) . "</td>";
+                echo "<td>" . htmlspecialchars($article['author']) . "</td>";
+                echo "<td>" . $article['created_at']->toDateTime()->format('Y-m-d H:i') . "</td>";
+                echo "<td>
+                        <a href='edit_article.php?id=" . $article['_id'] . "' class='btn btn-warning btn-sm'>Edit</a>
+                        <button class='btn btn-danger btn-sm delete-btn' data-id='" . $article['_id'] . "'>Hapus</button>
+                      </td>";
+                echo "</tr>";
+                $counter++;
+            }
+            ?>
+        </tbody>
+    </table>
+</div>
 
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="deleteForm" method="POST" action="delete_article.php">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="deleteModalLabel">Konfirmasi Penghapusan</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+          </div>
+          <div class="modal-body">
+            Apakah Anda yakin ingin menghapus artikel ini? Tindakan ini tidak dapat dibatalkan.
+            <input type="hidden" name="id" id="deleteArticleId">
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+            <button type="submit" class="btn btn-danger">Hapus</button>
+          </div>
+        </div>
+    </form>
+  </div>
+</div>
 
-    <!-- Custom JavaScript for AJAX Search -->
-    <script>
-        $(document).ready(function() {
-            // AJAX request when user types in the search bar
-            $('#search-query').on('input', function() {
-                let query = $(this).val(); // Get the search query
+<!-- Bootstrap JS Bundle -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- jQuery (required for DataTables) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+<!-- Custom JS -->
+<script>
+$(document).ready(function() {
+    // Initialize DataTable
+    var table = $('#articlesTable').DataTable({
+        "paging": true,
+        "ordering": true,
+        "info": false,
+        "lengthChange": false,
+        "pageLength": 10,
+        "language": {
+            "paginate": {
+                "previous": "Sebelumnya",
+                "next": "Selanjutnya"
+            },
+            "search": "Cari:"
+        }
+    });
 
-                // AJAX request to fetch search results
-                $.ajax({
-                    url: 'admin_dashboard.php', // Same page
-                    type: 'GET',
-                    data: {
-                        search: query // Pass the search query as a parameter
-                    },
-                    success: function(data) {
-                        $('#search-results').html($(data).find('#search-results').html()); // Update the search results
-                    }
-                });
-            });
-        });
-    </script>
-    <script src="sidebar-script.js"></script>
-    <script src="nav-btn-script.js"></script>
+    // Category Filter
+    $('#categoryFilter').on('change', function(){
+        var selected = $(this).val();
+        if(selected){
+            window.location.href = `admin_dashboard.php?category=${selected}`;
+        } else {
+            window.location.href = 'admin_dashboard.php';
+        }
+    });
+
+    // Custom Search
+    $('#articleSearch').on('keyup', function(){
+        table.search(this.value).draw();
+    });
+
+    // Delete Button Click
+    $('.delete-btn').on('click', function(){
+        var articleId = $(this).data('id');
+        $('#deleteArticleId').val(articleId);
+        var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+        deleteModal.show();
+    });
+});
+</script>
 </body>
-
 </html>
