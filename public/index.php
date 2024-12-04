@@ -7,79 +7,138 @@
     <title>News Portal</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .article-card {
-            margin-bottom: 20px;
-        }
+    <link rel="stylesheet" href="style-index.css">
 
-        .article-card .card-body {
-            padding: 15px;
-        }
-
-        .navbar {
-            margin-bottom: 20px;
-        }
-
-        /* Custom styles for mobile responsiveness */
-        @media (max-width: 767px) {
-            .article-card {
-                margin-bottom: 15px;
-            }
-        }
-    </style>
 </head>
 
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="#">News Portal</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link active" href="#">Home</a>
-                    </li>
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <img src="../asset/icon/app-logo.png" alt="logo">
+            <p>Simera News</p>
+        </div>
+
+        <div class="profile">
+            <img src="../asset/icon/person.jpg" alt="">
+            <p>
+                <span class="nama-header">Mahmoed</span><br>
+                <span class="status-header">Premium Plan</span>
+            </p>
+        </div>
+        <ul class="sidebar-menu">
+            <li>
+                <div class="divider"></div>
+            </li>
+            <li><img src="../asset/icon/house.svg" alt=""><a href="#"><span>Home</span></a></li>
+            <li><img src="../asset/icon/sparkle.svg" alt=""><a href="#"><span>For You</span></a></li>
+            <li><img src="../asset/icon/stack.svg" alt=""><a href="#"><span>Following</span></a></li>
+            <li><img src="../asset/icon/lightbulb.svg" alt=""><a href="#"><span>Suggestion</span></a></li>
+            <li>
+                <div class="divider"></div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <!-- Navbar -->
+        <div class="navbar">
+            <img src="../asset/icon/list.svg" id="menu-toggle" alt="">
+            <div class="nav-btn-group">
+                <ul>
+                    <li class="nav-btn active">Top Stories</li>
+                    <li class="nav-btn">For You</li>
+                    <li class="nav-btn">Your Topics</li>
+                    <li class="nav-btn">Fast Check</li>
+                    <li class="nav-btn">More</li>
                 </ul>
             </div>
-        </div>
-    </nav>
-
-    <!-- Search Bar -->
-    <div class="container mt-4">
-        <form method="GET" action="index.php" id="search-form">
-            <div class="input-group mb-3">
-                <input type="text" class="form-control" name="search" id="search-query"
-                    placeholder="Search news..." value="<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>">
-                <button class="btn btn-primary" type="submit">Search</button>
+            <div class="search-etc">
+                <img src="../asset/icon/bell.svg" alt="">
+                <div class="separator" style="height: 20px; width: 1px; background-color: #D2D2D2"></div>
+                <img src="../asset/icon/chats.svg" alt="">
+                <div class="search-bar">
+                    <img src="../asset/icon/search.svg" alt="">
+                    <input type="text" placeholder="Search" class="search-bar" name="search" id="search-query" value="<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>">
+                </div>
             </div>
-        </form>
+        </div>
 
-        <!-- Display Articles -->
-        <div class="row" id="search-results">
-            <?php
-            require '../includes/db.php'; // Include DB connection
+        <div class="main-content">
+            <div class="main-content-news container mt-3">
 
-            $searchQuery = isset($_GET['search']) ? ['$text' => ['$search' => $_GET['search']]] : [];
-            $articles = $newsCollection->find($searchQuery, ['limit' => 10, 'sort' => ['created_at' => -1]]);  // Fetch articles
+                <!-- Search Bar -->
+                <!-- <form method="GET" action="index.php" id="search-form">
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" name="search" id="search-query"
+                            placeholder="Search news..." value="<?php echo isset($_GET['search']) ? $_GET['search'] : ''; ?>">
+                        <button class="btn btn-primary" type="submit">Search</button>
+                    </div>
+                </form> -->
 
-            foreach ($articles as $article) {
-                echo "<div class='col-12 col-md-6 col-lg-4'>";  // Make it responsive
-                echo "<div class='card article-card'>";
-                echo "<div class='card-body'>";
-                echo "<h5 class='card-title'>" . htmlspecialchars($article['title']) . "</h5>";
-                echo "<p class='card-text'>" . htmlspecialchars($article['summary']) . "</p>";
-                echo "<p><small>Published: " . $article['created_at']->toDateTime()->format('Y-m-d H:i') . "</small></p>";
-                echo "<a href='view.php?id=" . $article['_id'] . "' class='btn btn-primary'>Read More</a>";
-                echo "</div>";
-                echo "</div>";
-                echo "</div>";
-            }
-            ?>
+                <!-- Display Articles -->
+                <div class="row" id="search-results">
+                    <?php
+                    require '../includes/db.php'; // Include DB connection
+
+                    $searchQuery = isset($_GET['search']) ? ['$text' => ['$search' => $_GET['search']]] : [];
+                    $articles = $newsCollection->find($searchQuery, ['limit' => 10, 'sort' => ['created_at' => -1]]);  // Fetch articles
+                    // Mengambil dokumen terakhir berdasarkan created_at
+                    $lastArticle = $newsCollection->findOne([], ['sort' => ['created_at' => -1]]);
+
+                    echo "<a href='view.php?id=" . htmlspecialchars($lastArticle['_id']) . "' class='text-decoration-none text-reset'>";
+                    echo "<div class='card'>";
+                    echo "<div class='main-news card-body'>";
+                    echo "<p class='card-title'>Card Title</p>";
+                    echo "<h5 class='card-text'>This is a wider card with supporting text below as a natural lead-in to additional content. We'll add an image below!</h5>";
+                    echo "<div class='line'></div>";
+                    echo "<div class='footer-card'>";
+                    echo "<p>tanggaaaaaal</p>";
+                    echo "<div class='right'>";
+                    echo "<img src='../asset/icon/heart.svg' alt='' style='width: 20px; height: 20px; margin-right: 10px;'>";
+                    echo "<img src='../asset/icon/share.svg' alt='' style='width: 20px; height: 20px;'>";
+                    echo "</div>";
+                    echo "</div>";
+                    echo "</div>";
+                    echo "</div>";
+                    echo "</a>";
+
+                    foreach ($articles as $article) {
+                        echo "<div class='col-12 col-md-6 col-lg-4 mt-3'>";  // Make it responsive
+                        echo "<div class='card article-card'>";
+                        echo "<img src='" . htmlspecialchars('../asset/icon/person.jpg') . "' class='card-img-top' alt='Card image' style='height: 200px; object-fit: cover;'>"; // Add the image
+                        echo "<div class='card-body'>";
+                        echo "<h5 class='card-title'>" . htmlspecialchars($article['title']) . "</h5>";
+                        echo "<p class='card-text'>" . htmlspecialchars($article['summary']) . "</p>";
+                        echo "<p><small>Published: " . $article['created_at']->toDateTime()->format('Y-m-d H:i') . "</small></p>";
+                        echo "</div>";
+                        echo "<div class='card-footer d-flex justify-content-between align-items-center'>";
+                        echo "<span class='text-muted'>" . htmlspecialchars($article['author']) . "</span>"; // Assuming there's an author
+                        echo "<a href='view.php?id=" . $article['_id'] . "' class='btn btn-link p-0'>Read More</a>";
+                        echo "</div>";
+                        echo "</div>";
+                        echo "</div>";
+                    }
+                    ?>
+                </div>
+
+            </div>
+            <div class="recommendation-content">
+                <div class="col-12 mt-3"> <!-- Make it responsive -->
+                    <div class="card article-card">
+                        <div class="card-header bg-white">
+                            Trending News
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title"><?php echo htmlspecialchars($lastArticle['title']); ?></h5>
+                            <p class="card-text"><?php echo htmlspecialchars($lastArticle['summary']); ?></p>
+                            <p><small>Published: <?php echo $lastArticle['created_at']->toDateTime()->format('Y-m-d H:i'); ?></small></p>
+                            <a href="view.php?id=<?php echo $lastArticle['_id']; ?>" class="btn btn-primary">Read More</a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 
@@ -89,25 +148,28 @@
 
     <!-- Custom JavaScript for AJAX Search -->
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             // Search form submit event (AJAX)
-            $('#search-form').on('submit', function (e) {
+            $('#search-form').on('submit', function(e) {
                 e.preventDefault();
-                let query = $('#search-query').val();  // Get the search query
+                let query = $('#search-query').val(); // Get the search query
 
                 // AJAX request to fetch search results
                 $.ajax({
-                    url: 'includes/search.php',      // PHP file to handle the search logic
+                    url: 'includes/search.php', // PHP file to handle the search logic
                     type: 'GET',
-                    data: { search: query }, // Pass the search query as a parameter
-                    success: function (data) {
-                        $('#search-results').html(data);  // Display the search results in the #search-results div
+                    data: {
+                        search: query
+                    }, // Pass the search query as a parameter
+                    success: function(data) {
+                        $('#search-results').html(data); // Display the search results in the #search-results div
                     }
                 });
             });
         });
     </script>
-
+    <script src="sidebar-script.js"></script>
+    <script src="nav-btn-script.js"></script>
 </body>
 
 </html>

@@ -1,0 +1,347 @@
+body {
+    color: #08080A;
+    background-color: #F4F4F5;
+    display: flex;
+    flex-direction: row;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 70px;
+    background-color: #F4F4F5;
+    color: #08080A;
+    height: 100vh;
+    position: flex;
+    transition: width 0.3s;
+    overflow: hidden;
+    border-right: #D2D2D2 1px solid;
+}
+
+.sidebar:hover,
+.sidebar.expanded {
+    width: 230px;
+}
+
+.sidebar-logo {
+    display: flex;
+    flex-direction: row;
+    font-size: 20px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: center;
+    padding: 15px 20px 15px 20px;
+    position: absolute;
+}
+
+.sidebar-logo img {
+    margin-top: 3px;
+    margin-right: 15px;
+    width: 30px;
+    height: 30px;
+}
+
+.sidebar-logo p {
+    display: none;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.profile {
+    display: flex;
+    top: 70px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: center;
+    padding: 15px 20px 15px 20px;
+    position: absolute;
+}
+
+.profile img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 20px;
+    margin-left: -2.5px;
+}
+
+.profile p {
+    margin: 0;
+    font-size: 20px;
+    flex-direction: column;
+    text-align: left;
+    display: none;
+    line-height: 13px;
+}
+
+.status-header {
+    font-size: 12px;
+}
+
+.sidebar:hover .sidebar-logo img,
+.sidebar:hover .sidebar-logo p,
+.sidebar.expanded .sidebar-logo img,
+.sidebar.expanded .sidebar-logo p,
+.sidebar:hover .profile img,
+.sidebar:hover .profile p,
+.sidebar.expanded .profile img,
+.sidebar.expanded .profile p {
+    display: inline-block;
+}
+
+.sidebar-menu {
+    position: absolute;
+    top: 150px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    padding: 0px 20px 40px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-menu li img {
+    display: flex;
+    padding-bottom: 2px;
+    margin-right: 20px;
+    width: 25px;
+    height: 25px;
+}
+
+.sidebar-menu li a {
+    text-decoration: none;
+    color: #08080A;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-menu li a span {
+    display: none;
+}
+
+.sidebar-menu li .divider {
+    height: 1px;
+    background-color: #D2D2D2;
+    width: 35px;
+    transition: width 0.3s;
+    margin-bottom: 0px;
+    margin-left: -3px;
+}
+
+.sidebar:hover .sidebar-menu li a span,
+.sidebar.expanded .sidebar-menu li a span {
+    display: inline-block;
+}
+
+.sidebar:hover .sidebar-menu li .divider,
+.sidebar.expanded .sidebar-menu li .divider {
+    width: 170px;
+}
+
+/* Main Content */
+
+/* Navbar */
+.navbar {
+    background-color: #F4F4F5;
+    color: #08080A;
+    height: 68px;
+    width: 100%;
+    position: flex;
+    display: flex;
+    flex-direction: space-between;
+    border-bottom: #D2D2D2 1px solid;
+    padding: 0 20px 0 20px;
+}
+
+.navbar img {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+}
+
+.nav-btn-group {
+    display: flex;
+    height: 100%;
+}
+
+.nav-btn-group ul {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: center;
+    list-style-type: none;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-btn {
+    display: flex;
+    padding: 0 15px 0 15px;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: center;
+    cursor: pointer;
+    }
+
+.nav-btn.active {
+    margin-top: 2px;
+    border-bottom: 2px solid #08080A;
+}
+
+.search-etc {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: center;
+    gap: 15px;
+}
+
+.search-bar {
+    width: 200px;
+    height: 30px;
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    vertical-align: center;
+    flex-direction: row;
+    border-radius: 10px;
+    padding: 0 10px;
+}
+
+.search-bar img {
+    width: 15px;
+    height: 15px;
+    margin-right: 10px;
+}
+
+.search-bar input[type="text"] {
+    border: none;
+    padding: 0;
+    background: transparent;
+    outline: none;
+    box-shadow: none;
+    /* Menghilangkan bayangan (shadow) jika ada */
+    appearance: none;
+    border-radius: 0px;
+    width: 100%;
+}
+
+/* Main Content */
+
+.main-content {
+    display: flex;
+    justify-content: row;
+    /* padding: 20px; */
+}
+.content {
+    width: 100%;
+}
+
+.main-content {
+    display: flex;
+    flex-direction: row; /* Setel agar konten utama dan sidebar berdampingan */
+    justify-content: space-between; /* Jika ingin ada jarak antar elemen */
+}
+
+.main-content-news {
+    flex: 1; /* Agar bagian ini mengisi ruang yang tersisa */
+    height: 80vh; /* Tentukan tinggi tetap atau max-height jika ingin lebih fleksibel */
+    overflow-y: auto; /* Membuat konten ini scrollable secara vertikal */
+    padding-right: 15px; /* Opsional, menambah padding agar scroll tidak terlalu dekat dengan konten */
+}
+
+.recommendation-content {
+    flex-basis: 230px; /* Lebar tetap untuk rekomendasi konten (bisa disesuaikan) */
+    /* Di sini, konten rekomendasi tidak perlu ada overflow atau scroll */
+    margin-left: 20px; /* Opsional, menambah jarak antara main-content dan recommendation */
+}
+
+.main-card {
+    display: flex;
+    height: 400px;
+}
+
+.main-news.card-body {
+    background-image: url('../asset/icon/person.jpg');
+    background-size: cover;
+    color: white;
+    height: 400px;
+    display: flex;
+    justify-content: flex-end; /* Posisi vertikal dimulai dari bawah */
+    align-items: flex-start; 
+    flex-direction: column;
+}
+
+.card {
+    border-radius: 10px;  /* Rounded corners for the card */
+    overflow: hidden; /* Ensures the image and text stay within the rounded edges */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Light shadow */
+}
+
+.card-body {
+    padding: 1rem;  /* Adjust padding inside the card */
+}
+
+.card-title {
+    font-size: 1.25rem; /* Adjust title size */
+    font-weight: bold;
+}
+
+.card-footer {
+    background-color: #fff;
+    border-top: 1px solid #f0f0f0;
+    padding: 0.75rem;
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover; /* Ensures image doesn't stretch or distort */
+}
+
+
+.line {
+    display: flex;
+    width: 100%;
+    height: 1px;
+    background-color: #D2D2D2;
+    margin-bottom: 5px;
+}
+
+.footer-card {
+    display: flex;
+    width: 100%; 
+    justify-content: space-between;
+    flex-direction: row;
+}
+
+.footer-card.right{
+    display: flex;
+    flex-direction: row;
+    gap: 100px;
+}
+
+.recommendation-content {
+    width: 25%;
+    margin-right: 15px;
+}
+
+/* Custom styles for mobile responsiveness */
+@media (max-width: 767px) {
+    .article-card {
+        margin-bottom: 15px;
+    }
+}
