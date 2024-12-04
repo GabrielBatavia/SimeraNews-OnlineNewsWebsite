@@ -68,7 +68,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <select class="form-select" id="category" name="category" required>
                 <option value="Politics">Politics</option>
                 <option value="Technology">Technology</option>
-                <option value="Sports">Sports</option>
+                <option value="Sports">Economy</option>
+                <option value="Sports">Criminal</option>
+                <option value="Sports">Entertainment</option>
                 <!-- Add other categories as needed -->
             </select>
         </div>

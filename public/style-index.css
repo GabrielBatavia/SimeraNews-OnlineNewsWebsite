@@ -80,6 +80,7 @@ body {
 
 .status-header {
     font-size: 12px;
+    padding-right: 10px;
 }
 
 .sidebar:hover .sidebar-logo img,

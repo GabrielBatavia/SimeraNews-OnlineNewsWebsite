@@ -1,30 +1,3 @@
-<?php
-// admin_dashboard.php (Admin Panel)
-
-session_start();
-if (!isset($_SESSION['admin_logged_in'])) {
-    header('Location: login.php');
-    exit;
-}
-
-if (isset($_GET['logout'])) {
-    session_start(); 
-    session_unset(); 
-    session_destroy(); 
-    header('Location: ../login.php'); 
-    exit;                  
-}
-
-
-require '../includes/db.php'; // MongoDB connection
-
-// Fetch articles from MongoDB
-$articles = $newsCollection->find();
-
-$searchQuery = isset($_GET['search']) ? ['$text' => ['$search' => $_GET['search']]] : [];
-$articles = $newsCollection->find($searchQuery, ['limit' => 10, 'sort' => ['created_at' => -1]]);
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -34,7 +7,7 @@ $articles = $newsCollection->find($searchQuery, ['limit' => 10, 'sort' => ['crea
     <title>News Portal</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../public/style-index.css">
+    <link rel="stylesheet" href="style-index.css">
 
 </head>
 
@@ -49,11 +22,10 @@ $articles = $newsCollection->find($searchQuery, ['limit' => 10, 'sort' => ['crea
         <div class="profile">
             <img src="../asset/icon/person.jpg" alt="">
             <p>
-                <span class="nama-header">Mahmoed</span><br>
-                <span class="status-header">Admin</span>
+                <span class="nama-header">Anonymous</span><br>
+                <span class="status-header">Log In to can access more</span>
             </p>
         </div>
-        
         <ul class="sidebar-menu">
             <li>
                 <div class="divider"></div>
@@ -62,23 +34,11 @@ $articles = $newsCollection->find($searchQuery, ['limit' => 10, 'sort' => ['crea
             <li><img src="../asset/icon/sparkle.svg" alt=""><a href="#"><span>For You</span></a></li>
             <li><img src="../asset/icon/stack.svg" alt=""><a href="#"><span>Following</span></a></li>
             <li><img src="../asset/icon/lightbulb.svg" alt=""><a href="#"><span>Suggestion</span></a></li>
-
-            <!-- Dropdown Menu for Admin -->
-            <li class="dropdown">
-                <img src="../asset/icon/pencil-square.svg" alt="">
-                <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"><span>Admin Settings</span></a>
-                <ul class="dropdown-menu p-0 m-0">
-                    <li><a href="./add_article.php" class="dropdown-item p-2 m-0">Create News</a></li>
-                    <li><a href="./manage_article.php" class="dropdown-item p-2 m-0">Manage News</a></li>
-                </ul>
+            <li>
+                <div class="divider"></div>
             </li>
-
-            <li><img src="../asset/icon/box-arrow-left.svg" alt=""><a href="admin_dashboard.php?logout=true"><span>Log out</span></a></li>
-            <div class="divider"></div>
-
         </ul>
     </div>
-
 
     <div class="content">
         <!-- Navbar -->
@@ -186,23 +146,23 @@ $articles = $newsCollection->find($searchQuery, ['limit' => 10, 'sort' => ['crea
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
-
     <!-- Custom JavaScript for AJAX Search -->
     <script>
         $(document).ready(function() {
-            // AJAX request when user types in the search bar
-            $('#search-query').on('input', function() {
-                let query = $(this).val(); // Get the search query
+            // Search form submit event (AJAX)
+            $('#search-form').on('submit', function(e) {
+                e.preventDefault();
+                let query = $('#search-query').val(); // Get the search query
 
                 // AJAX request to fetch search results
                 $.ajax({
-                    url: 'admin_dashboard.php', // Same page
+                    url: 'includes/search.php', // PHP file to handle the search logic
                     type: 'GET',
                     data: {
-                        search: query // Pass the search query as a parameter
-                    },
+                        search: query
+                    }, // Pass the search query as a parameter
                     success: function(data) {
-                        $('#search-results').html($(data).find('#search-results').html()); // Update the search results
+                        $('#search-results').html(data); // Display the search results in the #search-results div
                     }
                 });
             });

@@ -22,8 +22,8 @@
         <div class="profile">
             <img src="../asset/icon/person.jpg" alt="">
             <p>
-                <span class="nama-header">Mahmoed</span><br>
-                <span class="status-header">Premium Plan</span>
+                <span class="nama-header">Anonymous</span><br>
+                <span class="status-header">Log in/Sign In first</span>
             </p>
         </div>
         <ul class="sidebar-menu">
@@ -34,6 +34,8 @@
             <li><img src="../asset/icon/sparkle.svg" alt=""><a href="#"><span>For You</span></a></li>
             <li><img src="../asset/icon/stack.svg" alt=""><a href="#"><span>Following</span></a></li>
             <li><img src="../asset/icon/lightbulb.svg" alt=""><a href="#"><span>Suggestion</span></a></li>
+            <li>
+            <li><img src="../asset/icon/signIn.png" alt=""><a href="../login.php"><span>Log In/Sign In</span></a></li>
             <li>
                 <div class="divider"></div>
             </li>
@@ -141,6 +143,8 @@
             </div>
         </div>
     </div>
+
+    
 
     <!-- Bootstrap JS & jQuery -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>

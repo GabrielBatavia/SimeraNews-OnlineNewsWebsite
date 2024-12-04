@@ -67,19 +67,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .form-group {
             margin-bottom: 20px;
         }
-        h1 {
+        h3 {
             text-align: center;
             margin-bottom: 20px;
-            font-size: 36px;
+            font-size: 1.5rem;
             color: black;
+        }
+        .container-logo {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .container-logo img {
+            width: 20%;
         }
     </style>
 </head>
 <body>
 
 <div class="container login-container">
-    <h1>Welcome to SimeraNews</h1>
-    <h2>Login</h2>
+    <div class="container-logo">
+        <img src="./asset/icon/app-logo.png" alt="">
+    </div>
+    <h3>Log In to get features of SimeraNews</h3>
 
     <!-- Display error message if any -->
     <?php if (isset($error)) { echo "<div class='alert alert-danger'>$error</div>"; } ?>
