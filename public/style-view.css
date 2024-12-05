@@ -1,0 +1,331 @@
+body {
+    color: #08080A;
+    background-color: #F4F4F5;
+    display: flex;
+    flex-direction: row;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 70px;
+    background-color: #F4F4F5;
+    color: #08080A;
+    height: 100vh;
+    position: flex;
+    transition: width 0.3s;
+    overflow: hidden;
+    border-right: #D2D2D2 1px solid;
+}
+
+.sidebar:hover,
+.sidebar.expanded {
+    width: 230px;
+}
+
+.sidebar-logo {
+    display: flex;
+    flex-direction: row;
+    font-size: 20px;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: center;
+    padding: 15px 20px 15px 20px;
+    position: absolute;
+}
+
+.sidebar-logo img {
+    margin-top: 3px;
+    margin-right: 15px;
+    width: 30px;
+    height: 30px;
+}
+
+.sidebar-logo p {
+    display: none;
+    margin: 0;
+    padding: 0;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.profile {
+    display: flex;
+    top: 70px;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: center;
+    padding: 15px 20px 15px 20px;
+    position: absolute;
+}
+
+.profile img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 20px;
+    margin-left: -2.5px;
+}
+
+.profile p {
+    margin: 0;
+    font-size: 20px;
+    flex-direction: column;
+    text-align: left;
+    display: none;
+    line-height: 13px;
+}
+
+.status-header {
+    font-size: 12px;
+    padding-right: 10px;
+}
+
+.sidebar:hover .sidebar-logo img,
+.sidebar:hover .sidebar-logo p,
+.sidebar.expanded .sidebar-logo img,
+.sidebar.expanded .sidebar-logo p,
+.sidebar:hover .profile img,
+.sidebar:hover .profile p,
+.sidebar.expanded .profile img,
+.sidebar.expanded .profile p {
+    display: inline-block;
+}
+
+.sidebar-menu {
+    position: absolute;
+    top: 150px;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar-menu li {
+    padding: 0px 20px 40px 20px;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-menu li img {
+    display: flex;
+    padding-bottom: 2px;
+    margin-right: 20px;
+    width: 25px;
+    height: 25px;
+}
+
+.sidebar-menu li a {
+    text-decoration: none;
+    color: #08080A;
+    display: flex;
+    align-items: center;
+}
+
+.sidebar-menu li a span {
+    display: none;
+}
+
+.sidebar-menu li .divider {
+    height: 1px;
+    background-color: #D2D2D2;
+    width: 35px;
+    transition: width 0.3s;
+    margin-bottom: 0px;
+    margin-left: -3px;
+}
+
+.sidebar:hover .sidebar-menu li a span,
+.sidebar.expanded .sidebar-menu li a span {
+    display: inline-block;
+}
+
+.sidebar:hover .sidebar-menu li .divider,
+.sidebar.expanded .sidebar-menu li .divider {
+    width: 170px;
+}
+
+/* Main Content */
+
+/* Navbar */
+.navbar {
+    background-color: #F4F4F5;
+    color: #08080A;
+    height: 68px;
+    width: 100%;
+    position: flex;
+    display: flex;
+    flex-direction: space-between;
+    border-bottom: #D2D2D2 1px solid;
+    padding: 0 20px 0 20px;
+}
+
+.navbar img {
+    width: 25px;
+    height: 25px;
+    cursor: pointer;
+}
+
+.nav-btn-group {
+    display: flex;
+    height: 100%;
+}
+
+.nav-btn-group ul {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: center;
+    list-style-type: none;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.nav-btn {
+    display: flex;
+    padding: 0 15px 0 15px;
+    height: 100%;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: center;
+    cursor: pointer;
+}
+
+.nav-btn.active {
+    margin-top: 2px;
+    border-bottom: 2px solid #08080A;
+}
+
+.search-etc {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: center;
+    gap: 15px;
+}
+
+.search-bar {
+    width: 200px;
+    height: 30px;
+    border: 1px solid #ccc;
+    display: flex;
+    align-items: center;
+    vertical-align: center;
+    flex-direction: row;
+    border-radius: 10px;
+    padding: 0 10px;
+}
+
+.search-bar img {
+    width: 15px;
+    height: 15px;
+    margin-right: 10px;
+}
+
+.search-bar input[type="text"] {
+    border: none;
+    padding: 0;
+    background: transparent;
+    outline: none;
+    box-shadow: none;
+    /* Menghilangkan bayangan (shadow) jika ada */
+    appearance: none;
+    border-radius: 0px;
+    width: 100%;
+}
+
+/* Main Content */
+.main-content-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.main-content {
+    display: flex;
+    justify-content: row;
+    vertical-align: center;
+    align-items: flex-start;
+    overflow-y: auto;
+    /* padding: 20px; */
+}
+
+.content {
+    width: 100%;
+}
+
+.main-content img {
+    height: 200px;
+    object-fit: cover;
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
+
+.scrollable {
+    height: 100%;
+    overflow-y: auto;
+}
+
+/* Recomendation */
+
+.recommendation-content {
+    margin-right: 15px;
+}
+
+.recommend-list {
+    padding: 15px;
+}
+
+.recommend-list ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recommend-list li {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    vertical-align: center;
+    cursor: pointer;
+    padding: 10px;
+}
+
+.recommend-list li:hover {
+    background-color: #e9e9e9;
+    margin-left: 0px;
+    margin-right: 0px;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.recommend-list li p {
+    font-size: 15px;
+    display: -webkit-box;
+    /* Menggunakan box model fleksibel */
+    -webkit-box-orient: vertical;
+    /* Mengatur orientasi box secara vertikal */
+    overflow: hidden;
+    /* Sembunyikan teks yang melampaui area */
+    text-overflow: ellipsis;
+    /* Tambahkan ... untuk teks yang terpotong */
+    -webkit-line-clamp: 3;
+    /* Batasi teks menjadi dua baris */
+    margin-bottom: 0px;
+}
+
+.recommend-list li img {
+    width: 20px;
+    height: 20px;
+    border-radius: 10%;
+    margin-bottom: 0px;
+    margin-right: 10px;
+}
