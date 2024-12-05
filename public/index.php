@@ -12,7 +12,6 @@
 </head>
 
 <body>
-
     <div class="sidebar">
         <div class="sidebar-logo">
             <img src="../asset/icon/app-logo.png" alt="logo">
@@ -80,44 +79,52 @@
                 <div class="row" id="search-results">
                     <?php
                     require '../includes/db.php'; // Include DB connection
+                    require 'img-logic.php';
 
                     $searchQuery = isset($_GET['search']) ? ['$text' => ['$search' => $_GET['search']]] : [];
                     $articles = $newsCollection->find($searchQuery, ['limit' => 10, 'sort' => ['created_at' => -1]]);  // Fetch articles
                     // Mengambil dokumen terakhir berdasarkan created_at
                     $lastArticle = $newsCollection->findOne([], ['sort' => ['created_at' => -1]]);
-
-                    echo "<a href='view.php?id=" . htmlspecialchars($lastArticle['_id']) . "' class='text-decoration-none text-reset'>";
-                    echo "<div class='card'>";
-                    echo "<div class='main-news card-body'>";
-                    echo "<p class='card-title'>Card Title</p>";
-                    echo "<h5 class='card-text'>This is a wider card with supporting text below as a natural lead-in to additional content. We'll add an image below!</h5>";
-                    echo "<div class='line'></div>";
-                    echo "<div class='footer-card'>";
-                    echo "<p>tanggaaaaaal</p>";
-                    echo "<div class='right'>";
-                    echo "<img src='../asset/icon/heart.svg' alt='' style='width: 20px; height: 20px; margin-right: 10px;'>";
-                    echo "<img src='../asset/icon/share.svg' alt='' style='width: 20px; height: 20px;'>";
-                    echo "</div>";
-                    echo "</div>";
-                    echo "</div>";
-                    echo "</div>";
-                    echo "</a>";
+                    $imgMain = getImg($lastArticle);
+                    ?>
+                    <a href="view.php?id=<?php echo htmlspecialchars($lastArticle['_id']); ?>" class="text-decoration-none text-reset">
+                        <div class="card">
+                            <div class="main-news card-body" style="background-image: url(<?php echo $imgMain ?>)">
+                                <p class="card-title"><?php echo htmlspecialchars($lastArticle['category']); ?></p>
+                                <h5 class="card-text"><?php echo htmlspecialchars($lastArticle['title']); ?></h5>
+                                <div class="line"></div>
+                                <div class="footer-card">
+                                    <p><?php echo htmlspecialchars($lastArticle['author']); ?> - <?php echo $lastArticle['created_at']->toDateTime()->format('d F Y'); ?></p>
+                                    <div class="right">
+                                        <img src="../asset/icon/heart.svg" alt="" style="width: 20px; height: 20px; margin-right: 10px;">
+                                        <img src="../asset/icon/share.svg" alt="" style="width: 20px; height: 20px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                    <?php
 
                     foreach ($articles as $article) {
-                        echo "<div class='col-12 col-md-6 col-lg-4 mt-3'>";  // Make it responsive
-                        echo "<div class='card article-card'>";
-                        echo "<img src='" . htmlspecialchars('../asset/icon/person.jpg') . "' class='card-img-top' alt='Card image' style='height: 200px; object-fit: cover;'>"; // Add the image
-                        echo "<div class='card-body'>";
-                        echo "<h5 class='card-title'>" . htmlspecialchars($article['title']) . "</h5>";
-                        echo "<p class='card-text'>" . htmlspecialchars($article['summary']) . "</p>";
-                        echo "<p><small>Published: " . $article['created_at']->toDateTime()->format('Y-m-d H:i') . "</small></p>";
-                        echo "</div>";
-                        echo "<div class='card-footer d-flex justify-content-between align-items-center'>";
-                        echo "<span class='text-muted'>" . htmlspecialchars($article['author']) . "</span>"; // Assuming there's an author
-                        echo "<a href='view.php?id=" . $article['_id'] . "' class='btn btn-link p-0'>Read More</a>";
-                        echo "</div>";
-                        echo "</div>";
-                        echo "</div>";
+                        $imgCard = getImg($article);
+                    ?>
+                        <a class="col-12 col-md-6 col-lg-4 mt-3" href="view.php?id=<?php echo $article['_id']; ?>" style="color: inherit; text-decoration: none;"> <!-- Make it responsive -->
+                            <div class="card article-card">
+                                <img src="<?php echo htmlspecialchars($imgCard); ?>" class="card-img-top" alt="Card image" style="height: 200px; object-fit: cover;"> <!-- Add the image -->
+                                <div class="card-body">
+                                    <p class="group-card-category"><?php echo htmlspecialchars($article['category']); ?></p>
+                                    <p class="group-card-title"><?php echo htmlspecialchars($article['title']); ?></p>
+                                </div>
+                                <div class="card-footer d-flex justify-content-between align-items-center">
+                                    <span class="text-muted"><?php echo htmlspecialchars($article['author']); ?> - <?php echo $article['created_at']->toDateTime()->format('d F Y'); ?></span> <!-- Assuming there's an author -->
+                                    <div class="right">
+                                        <img src="../asset/icon/heart-black.svg" alt="ppp" style="width: 20px; height: 20px; margin-right: 10px;">
+                                        <img src="../asset/icon/share-black.svg" alt="ppp" style="width: 20px; height: 20px; margin-bottom: 2px;">
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    <?php
                     }
                     ?>
                 </div>
@@ -127,17 +134,30 @@
                 <div class="col-12 mt-3"> <!-- Make it responsive -->
                     <div class="card article-card">
                         <div class="card-header bg-white">
-                            Trending News
+                            Trending Sections
                         </div>
-                        <div class="card-body">
-                            <h5 class="card-title"><?php echo htmlspecialchars($lastArticle['title']); ?></h5>
-                            <p class="card-text"><?php echo htmlspecialchars($lastArticle['summary']); ?></p>
-                            <p><small>Published: <?php echo $lastArticle['created_at']->toDateTime()->format('Y-m-d H:i'); ?></small></p>
-                            <a href="view.php?id=<?php echo $lastArticle['_id']; ?>" class="btn btn-primary">Read More</a>
+                        <div class="recommend-list">
+                            <ul>
+                                <li id="politics">
+                                    <img src="../asset/icon/flag.svg" alt="">
+                                    <p>Politics</p>
+                                </li>
+                                <li id="technology">
+                                    <img src="../asset/icon/robot.svg" alt="">
+                                    <p>Technology</p>
+                                </li>
+                                <li id="sports">
+                                    <img src="../asset/icon/ball.svg" alt="">
+                                    <p>Sports</p>
+                                </li>
+                                <li id="all-category">
+                                    <img src="../asset/icon/hash.svg" alt="">
+                                    <p>All Category</p>
+                                </li>
+                            </ul>
                         </div>
                     </div>
                 </div>
-
             </div>
         </div>
     </div>
@@ -163,6 +183,23 @@
                     }, // Pass the search query as a parameter
                     success: function(data) {
                         $('#search-results').html(data); // Display the search results in the #search-results div
+                    }
+                });
+            });
+
+            // Fungsi untuk menangani klik pada kategori
+            $('li').on('click', function() {
+                var category = $(this).attr('id'); // Ambil ID kategori yang dipilih
+
+                // AJAX request untuk mengambil artikel berdasarkan kategori
+                $.ajax({
+                    url: 'filter-news.php', // PHP file untuk mencari berdasarkan kategori
+                    type: 'GET',
+                    data: {
+                        category: category // Kirimkan kategori yang dipilih
+                    },
+                    success: function(data) {
+                        $('#search-results').html(data); // Tampilkan hasil pencarian pada elemen #search-results
                     }
                 });
             });

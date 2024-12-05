@@ -264,6 +264,10 @@ body {
     padding-right: 15px; /* Opsional, menambah padding agar scroll tidak terlalu dekat dengan konten */
 }
 
+.main-news.card-body {
+    padding-bottom: 0px;
+}
+
 .recommendation-content {
     flex-basis: 230px; /* Lebar tetap untuk rekomendasi konten (bisa disesuaikan) */
     /* Di sini, konten rekomendasi tidak perlu ada overflow atau scroll */
@@ -276,7 +280,6 @@ body {
 }
 
 .main-news.card-body {
-    background-image: url('../asset/icon/person.jpg');
     background-size: cover;
     color: white;
     height: 400px;
@@ -297,8 +300,9 @@ body {
 }
 
 .card-title {
-    font-size: 1.25rem; /* Adjust title size */
-    font-weight: bold;
+    font-size: 15px; /* Adjust title size */
+    margin-bottom: 0rem;
+    font-weight: 200;
 }
 
 .card-footer {
@@ -312,13 +316,23 @@ body {
     object-fit: cover; /* Ensures image doesn't stretch or distort */
 }
 
-
 .line {
     display: flex;
     width: 100%;
     height: 1px;
     background-color: #D2D2D2;
     margin-bottom: 5px;
+}
+
+.group-card-category {
+    margin-bottom: 0;
+    color: #7b7b7b;
+    font-size: 12px;
+}   
+
+.group-card-title {
+    margin-bottom: 0;
+    font-size: 18px;
 }
 
 .footer-card {
@@ -334,9 +348,62 @@ body {
     gap: 100px;
 }
 
+.card-footer.right{
+    display: flex;
+    flex-direction: row;
+    gap: 100px;
+}
+
 .recommendation-content {
     width: 25%;
     margin-right: 15px;
+}
+
+.recommend-list {
+    padding: 15px;
+}
+
+.recommend-list ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.recommend-list li {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: flex-start;
+    text-align: left;
+    vertical-align: center;
+    cursor: pointer;
+    padding:10px;
+}
+
+.recommend-list li:hover {
+    background-color: #e9e9e9;
+    margin-left: 0px;
+    margin-right: 0px;
+    width: 100%;
+    border-radius: 10px;
+}
+
+.recommend-list li p{
+    font-size: 15px;
+    display: -webkit-box; /* Menggunakan box model fleksibel */
+    -webkit-box-orient: vertical; /* Mengatur orientasi box secara vertikal */
+    overflow: hidden; /* Sembunyikan teks yang melampaui area */
+    text-overflow: ellipsis; /* Tambahkan ... untuk teks yang terpotong */
+    -webkit-line-clamp: 3; /* Batasi teks menjadi dua baris */
+    margin-bottom: 0px;
+}
+
+.recommend-list li img {
+    width: 20px;
+    height: 20px;
+    border-radius: 10%;
+    margin-bottom: 0px;
+    margin-right: 10px;
 }
 
 /* Custom styles for mobile responsiveness */
