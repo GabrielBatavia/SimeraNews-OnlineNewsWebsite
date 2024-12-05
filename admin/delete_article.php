@@ -1,5 +1,5 @@
 <?php
-// delete_article.php (Delete Article)
+// delete_article.php
 
 session_start();
 if (!isset($_SESSION['admin_logged_in'])) {
@@ -9,15 +9,25 @@ if (!isset($_SESSION['admin_logged_in'])) {
 
 require '../includes/db.php'; // MongoDB connection
 
-// Fetch the article by ID
-if (isset($_GET['id'])) {
-    $articleId = new MongoDB\BSON\ObjectId($_GET['id']);
-    
-    // Delete the article
-    $newsCollection->deleteOne(['_id' => $articleId]);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['id'])) {
+        $articleId = $_POST['id'];
 
-    // Redirect to the dashboard
-    header('Location: admin_dashboard.php');
-    exit;
+        try {
+            $result = $newsCollection->deleteOne(['_id' => new MongoDB\BSON\ObjectId($articleId)]);
+            if ($result->getDeletedCount() === 1) {
+                $_SESSION['message'] = "Artikel berhasil dihapus.";
+            } else {
+                $_SESSION['message'] = "Artikel tidak ditemukan.";
+            }
+        } catch (Exception $e) {
+            $_SESSION['message'] = "Terjadi kesalahan: " . $e->getMessage();
+        }
+    } else {
+        $_SESSION['message'] = "ID artikel tidak diberikan.";
+    }
 }
+
+header('Location: admin_dashboard.php');
+exit;
 ?>

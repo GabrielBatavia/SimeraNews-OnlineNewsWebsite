@@ -1,25 +1,3 @@
-<?php
-// user
-session_start();
-if (!isset($_SESSION['user_logged_in'])) {
-    header('Location: ../login.php');
-    exit;
-}
-
-if (isset($_GET['logout'])) {
-    // Destroy the existing session
-    session_unset();    // Clear all session variables
-    session_destroy();  // Destroy the session
-    header('Location: ../login.php');  // Redirect to login page
-    exit;               
-}
-
-require '../includes/db.php'; // MongoDB connection
-
-// Fetch articles from MongoDB
-$articles = $newsCollection->find();
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 
@@ -29,7 +7,7 @@ $articles = $newsCollection->find();
     <title>News Portal</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="../public/style-index.css">
+    <link rel="stylesheet" href="style-index.css">
 
 </head>
 
@@ -44,8 +22,8 @@ $articles = $newsCollection->find();
         <div class="profile">
             <img src="../asset/icon/person.jpg" alt="">
             <p>
-                <span class="nama-header">Mahmoed</span><br>
-                <span class="status-header">User</span>
+                <span class="nama-header">Anonymous</span><br>
+                <span class="status-header">Log In to can access more</span>
             </p>
         </div>
         <ul class="sidebar-menu">
@@ -56,7 +34,7 @@ $articles = $newsCollection->find();
             <li><img src="../asset/icon/sparkle.svg" alt=""><a href="#"><span>For You</span></a></li>
             <li><img src="../asset/icon/stack.svg" alt=""><a href="#"><span>Following</span></a></li>
             <li><img src="../asset/icon/lightbulb.svg" alt=""><a href="#"><span>Suggestion</span></a></li>
-            <li><img src="../asset/icon/box-arrow-left.svg" alt=""><a href="user_dashboard.php?logout=true"><span>Log out</span></a></li>
+            <li>
                 <div class="divider"></div>
             </li>
         </ul>

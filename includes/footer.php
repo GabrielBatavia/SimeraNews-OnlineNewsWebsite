@@ -40,3 +40,42 @@
     </div>
   </div>
 </footer>
+
+<style>
+/* Mengatur margin dan padding pada body dan html */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+}
+
+/* Membuat layout menggunakan Flexbox */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+/* Mengatur konten utama agar mengisi ruang fleksibel */
+.content {
+    flex: 1;
+}
+
+/* Menambahkan styling footer */
+footer {
+    background-color: #343a40; /* Warna footer gelap */
+    color: #ffffff; /* Warna teks putih */
+    text-align: center;
+    padding: 1rem 0;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Jika perlu, tambahkan styling lainnya untuk footer */
+footer .container {
+    max-width: 100%;
+}
+
+
+</style>
