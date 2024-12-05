@@ -4,6 +4,7 @@ ini_set('display_errors', 1); // Aktifkan display errors untuk debugging
 error_reporting(E_ALL);
 
 require __DIR__ . '/db.php'; // Perbaiki path require
+require '../public/img-logic.php';
 
 // Get the search query from the GET request
 $searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
@@ -25,22 +26,25 @@ if (!empty($searchQuery)) {
     foreach ($articles as $article) {
         $hasResults = true;
         // Asumsi bahwa ada field 'image' yang menyimpan URL gambar artikel
-        $imageUrl = isset($article['image']) ? htmlspecialchars($article['image']) : '../asset/icon/person.jpg';
-
-        echo "<div class='col-12 col-md-6 col-lg-4 mt-3'>";  // Responsif
-        echo "<div class='card article-card'>";
-        echo "<img src='" . $imageUrl . "' class='card-img-top' alt='Article Image'>";
-        echo "<div class='card-body'>";
-        echo "<h5 class='card-title'>" . htmlspecialchars($article['title']) . "</h5>";
-        echo "<p class='card-text'>" . htmlspecialchars($article['summary']) . "</p>";
-        echo "<p><small>Published: " . $article['created_at']->toDateTime()->format('Y-m-d H:i') . "</small></p>";
-        echo "</div>";
-        echo "<div class='card-footer d-flex justify-content-between align-items-center'>";
-        echo "<span class='text-muted'>" . htmlspecialchars($article['author']) . "</span>"; // Asumsi ada author
-        echo "<a href='view.php?id=" . htmlspecialchars($article['_id']) . "' class='btn btn-link p-0'>Read More</a>";
-        echo "</div>";
-        echo "</div>";
-        echo "</div>";
+        $imgCard = getImg($article);
+?>
+        <a class="col-12 col-md-6 col-lg-4 mt-3" href="view.php?id=<?php echo $article['_id']; ?>" style="color: inherit; text-decoration: none;"> <!-- Make it responsive -->
+            <div class="card article-card">
+                <img src="<?php echo htmlspecialchars($imgCard); ?>" class="card-img-top" alt="Card image" style="height: 200px; object-fit: cover;"> <!-- Add the image -->
+                <div class="card-body">
+                    <p class="group-card-category"><?php echo htmlspecialchars($article['category']); ?></p>
+                    <p class="group-card-title"><?php echo htmlspecialchars($article['title']); ?></p>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    <span class="text-muted"><?php echo htmlspecialchars($article['author']); ?> - <?php echo $article['created_at']->toDateTime()->format('d F Y'); ?></span> <!-- Assuming there's an author -->
+                    <div class="right">
+                        <img src="../asset/icon/heart-black.svg" alt="ppp" style="width: 20px; height: 20px; margin-right: 10px;">
+                        <img src="../asset/icon/share-black.svg" alt="ppp" style="width: 20px; height: 20px; margin-bottom: 2px;">
+                    </div>
+                </div>
+            </div>
+        </a>
+<?php
     }
 
     if (!$hasResults) {

@@ -72,6 +72,7 @@
                 <div class="row" id="search-results">
                     <?php
                     require '../includes/db.php'; // Sertakan koneksi DB
+                    require 'img-logic.php';
 
                     // Mendapatkan query pencarian dari GET request
                     $searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
@@ -89,20 +90,25 @@
                         $hasResults = false;
                         foreach ($articles as $article) {
                             $hasResults = true;
-                            echo "<div class='col-12 col-md-6 col-lg-4 mt-3'>";  // Responsif
-                            echo "<div class='card article-card'>";
-                            echo "<img src='" . htmlspecialchars('../asset/icon/person.jpg') . "' class='card-img-top' alt='Card image' style='height: 200px; object-fit: cover;'>"; // Gambar
-                            echo "<div class='card-body'>";
-                            echo "<h5 class='card-title'>" . htmlspecialchars($article['title']) . "</h5>";
-                            echo "<p class='card-text'>" . htmlspecialchars($article['summary']) . "</p>";
-                            echo "<p><small>Published: " . $article['created_at']->toDateTime()->format('Y-m-d H:i') . "</small></p>";
-                            echo "</div>";
-                            echo "<div class='card-footer d-flex justify-content-between align-items-center'>";
-                            echo "<span class='text-muted'>" . htmlspecialchars($article['author']) . "</span>"; // Asumsi ada author
-                            echo "<a href='view.php?id=" . htmlspecialchars($article['_id']) . "' class='btn btn-link p-0'>Read More</a>";
-                            echo "</div>";
-                            echo "</div>";
-                            echo "</div>";
+                            $imgCard = getImg($article);
+                    ?>
+                            <a class="col-12 col-md-6 col-lg-4 mt-3" href="view.php?id=<?php echo $article['_id']; ?>" style="color: inherit; text-decoration: none;"> <!-- Make it responsive -->
+                                <div class="card article-card">
+                                    <img src="<?php echo htmlspecialchars($imgCard); ?>" class="card-img-top" alt="Card image" style="height: 200px; object-fit: cover;"> <!-- Add the image -->
+                                    <div class="card-body">
+                                        <p class="group-card-category"><?php echo htmlspecialchars($article['category']); ?></p>
+                                        <p class="group-card-title"><?php echo htmlspecialchars($article['title']); ?></p>
+                                    </div>
+                                    <div class="card-footer d-flex justify-content-between align-items-center">
+                                        <span class="text-muted"><?php echo htmlspecialchars($article['author']); ?> - <?php echo $article['created_at']->toDateTime()->format('d F Y'); ?></span> <!-- Assuming there's an author -->
+                                        <div class="right">
+                                            <img src="../asset/icon/heart-black.svg" alt="ppp" style="width: 20px; height: 20px; margin-right: 10px;">
+                                            <img src="../asset/icon/share-black.svg" alt="ppp" style="width: 20px; height: 20px; margin-bottom: 2px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        <?php
                         }
 
                         if (!$hasResults) {
@@ -110,22 +116,48 @@
                         }
                     } else {
                         // Jika tidak ada pencarian, tampilkan artikel terbaru atau sesuai kebutuhan Anda
+                        $lastArticle = $newsCollection->findOne([], ['sort' => ['created_at' => -1]]);
+                        $imgMain = getImg($lastArticle);
+                        ?>
+                        <a href="view.php?id=<?php echo htmlspecialchars($lastArticle['_id']); ?>" class="text-decoration-none text-reset">
+                            <div class="card">
+                                <div class="main-news card-body" style="background-image: url(<?php echo $imgMain ?>)">
+                                    <p class="card-title"><?php echo htmlspecialchars($lastArticle['category']); ?></p>
+                                    <h5 class="card-text"><?php echo htmlspecialchars($lastArticle['title']); ?></h5>
+                                    <div class="line"></div>
+                                    <div class="footer-card">
+                                        <p><?php echo htmlspecialchars($lastArticle['author']); ?> - <?php echo $lastArticle['created_at']->toDateTime()->format('d F Y'); ?></p>
+                                        <div class="right">
+                                            <img src="../asset/icon/heart.svg" alt="" style="width: 20px; height: 20px; margin-right: 10px;">
+                                            <img src="../asset/icon/share.svg" alt="" style="width: 20px; height: 20px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                        <?php
+
                         $articles = $newsCollection->find([], ['limit' => 10, 'sort' => ['created_at' => -1]]);
                         foreach ($articles as $article) {
-                            echo "<div class='col-12 col-md-6 col-lg-4 mt-3'>";  // Responsif
-                            echo "<div class='card article-card'>";
-                            echo "<img src='" . htmlspecialchars('../asset/icon/person.jpg') . "' class='card-img-top' alt='Card image' style='height: 200px; object-fit: cover;'>"; // Gambar
-                            echo "<div class='card-body'>";
-                            echo "<h5 class='card-title'>" . htmlspecialchars($article['title']) . "</h5>";
-                            echo "<p class='card-text'>" . htmlspecialchars($article['summary']) . "</p>";
-                            echo "<p><small>Published: " . $article['created_at']->toDateTime()->format('Y-m-d H:i') . "</small></p>";
-                            echo "</div>";
-                            echo "<div class='card-footer d-flex justify-content-between align-items-center'>";
-                            echo "<span class='text-muted'>" . htmlspecialchars($article['author']) . "</span>"; // Asumsi ada author
-                            echo "<a href='view.php?id=" . htmlspecialchars($article['_id']) . "' class='btn btn-link p-0'>Read More</a>";
-                            echo "</div>";
-                            echo "</div>";
-                            echo "</div>";
+                            $imgCard = getImg($article);
+                        ?>
+                            <a class="col-12 col-md-6 col-lg-4 mt-3" href="view.php?id=<?php echo $article['_id']; ?>" style="color: inherit; text-decoration: none;"> <!-- Make it responsive -->
+                                <div class="card article-card">
+                                    <img src="<?php echo htmlspecialchars($imgCard); ?>" class="card-img-top" alt="Card image" style="height: 200px; object-fit: cover;"> <!-- Add the image -->
+                                    <div class="card-body">
+                                        <p class="group-card-category"><?php echo htmlspecialchars($article['category']); ?></p>
+                                        <p class="group-card-title"><?php echo htmlspecialchars($article['title']); ?></p>
+                                    </div>
+                                    <div class="card-footer d-flex justify-content-between align-items-center">
+                                        <span class="text-muted"><?php echo htmlspecialchars($article['author']); ?> - <?php echo $article['created_at']->toDateTime()->format('d F Y'); ?></span> <!-- Assuming there's an author -->
+                                        <div class="right">
+                                            <img src="../asset/icon/heart-black.svg" alt="ppp" style="width: 20px; height: 20px; margin-right: 10px;">
+                                            <img src="../asset/icon/share-black.svg" alt="ppp" style="width: 20px; height: 20px; margin-bottom: 2px;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                    <?php
                         }
                     }
                     ?>
@@ -171,112 +203,131 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-    $(document).ready(function () {
-        const $searchInput = $('#search-query');
-        const $autocompleteResults = $('#autocomplete-results');
-        const $searchResults = $('#search-results');
-        let debounceTimeout = null;
+        $(document).ready(function() {
+            const $searchInput = $('#search-query');
+            const $autocompleteResults = $('#autocomplete-results');
+            const $searchResults = $('#search-results');
+            let debounceTimeout = null;
 
-        // Fungsi untuk menangani autocomplete dengan debouncing
-        $searchInput.on('input', function () {
-            const query = $(this).val().trim();
+            // Fungsi untuk menangani autocomplete dengan debouncing
+            $searchInput.on('input', function() {
+                const query = $(this).val().trim();
 
-            if (debounceTimeout) {
-                clearTimeout(debounceTimeout);
-            }
-
-            debounceTimeout = setTimeout(function () {
-                if (query.length === 0) {
-                    $autocompleteResults.empty().hide();
-                    return;
+                if (debounceTimeout) {
+                    clearTimeout(debounceTimeout);
                 }
 
-                // AJAX request ke autocomplete.php
-                $.ajax({
-                    url: '../includes/autocomplete.php', // Pastikan path benar
-                    type: 'GET',
-                    data: { query: query },
-                    success: function (data) {
-                        $autocompleteResults.empty();
-
-                        if (data.length > 0) {
-                            data.forEach(function (item) {
-                                // Highlight kata kunci di judul
-                                const regex = new RegExp('(' + query + ')', 'gi');
-                                const highlightedTitle = item.title.replace(regex, '<strong>$1</strong>');
-
-                                const suggestion = $('<div>')
-                                    .addClass('autocomplete-suggestion')
-                                    .html(highlightedTitle) // Menggunakan HTML untuk highlight
-                                    .attr('data-id', item.id);
-
-                                $autocompleteResults.append(suggestion);
-                            });
-                            $autocompleteResults.show();
-                        } else {
-                            $autocompleteResults.hide();
-                        }
-                    },
-                    error: function (jqXHR, textStatus, errorThrown) {
+                debounceTimeout = setTimeout(function() {
+                    if (query.length === 0) {
                         $autocompleteResults.empty().hide();
+                        return;
+                    }
+
+                    // AJAX request ke autocomplete.php
+                    $.ajax({
+                        url: '../includes/autocomplete.php', // Pastikan path benar
+                        type: 'GET',
+                        data: {
+                            query: query
+                        },
+                        success: function(data) {
+                            $autocompleteResults.empty();
+
+                            if (data.length > 0) {
+                                data.forEach(function(item) {
+                                    // Highlight kata kunci di judul
+                                    const regex = new RegExp('(' + query + ')', 'gi');
+                                    const highlightedTitle = item.title.replace(regex, '<strong>$1</strong>');
+
+                                    const suggestion = $('<div>')
+                                        .addClass('autocomplete-suggestion')
+                                        .html(highlightedTitle) // Menggunakan HTML untuk highlight
+                                        .attr('data-id', item.id);
+
+                                    $autocompleteResults.append(suggestion);
+                                });
+                                $autocompleteResults.show();
+                            } else {
+                                $autocompleteResults.hide();
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            $autocompleteResults.empty().hide();
+                            console.error('AJAX Error:', textStatus, errorThrown);
+                            console.error('Response Text:', jqXHR.responseText);
+                        }
+                    });
+                }, 300); // Debounce delay 300ms
+            });
+
+            // Menangani klik pada saran autocomplete
+            $autocompleteResults.on('click', '.autocomplete-suggestion', function() {
+                const selectedTitle = $(this).text();
+                const selectedId = $(this).data('id');
+
+                $searchInput.val(selectedTitle);
+                $autocompleteResults.empty().hide();
+
+                // Melakukan pencarian berdasarkan judul yang dipilih
+                performSearch(selectedTitle);
+            });
+
+            // Menangani penekanan enter pada input pencarian
+            $searchInput.on('keypress', function(e) {
+                if (e.which === 13) { // Enter key pressed
+                    e.preventDefault();
+                    const query = $(this).val().trim();
+                    $autocompleteResults.empty().hide();
+
+                    if (query.length > 0) {
+                        performSearch(query);
+                    }
+                }
+            });
+
+            // Fungsi untuk melakukan pencarian AJAX
+            function performSearch(query) {
+                // AJAX request ke search.php
+                $.ajax({
+                    url: '../includes/search.php', // Pastikan path benar
+                    type: 'GET',
+                    data: {
+                        search: query
+                    },
+                    success: function(data) {
+                        $searchResults.html(data);
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        $searchResults.html('<p>Terjadi kesalahan saat melakukan pencarian: ' + textStatus + ' - ' + errorThrown + '</p>');
                         console.error('AJAX Error:', textStatus, errorThrown);
                         console.error('Response Text:', jqXHR.responseText);
                     }
                 });
-            }, 300); // Debounce delay 300ms
-        });
-
-        // Menangani klik pada saran autocomplete
-        $autocompleteResults.on('click', '.autocomplete-suggestion', function () {
-            const selectedTitle = $(this).text();
-            const selectedId = $(this).data('id');
-
-            $searchInput.val(selectedTitle);
-            $autocompleteResults.empty().hide();
-
-            // Melakukan pencarian berdasarkan judul yang dipilih
-            performSearch(selectedTitle);
-        });
-
-        // Menangani penekanan enter pada input pencarian
-        $searchInput.on('keypress', function (e) {
-            if (e.which === 13) { // Enter key pressed
-                e.preventDefault();
-                const query = $(this).val().trim();
-                $autocompleteResults.empty().hide();
-
-                if (query.length > 0) {
-                    performSearch(query);
-                }
             }
-        });
 
-        // Fungsi untuk melakukan pencarian AJAX
-        function performSearch(query) {
-            // AJAX request ke search.php
-            $.ajax({
-                url: '../includes/search.php', // Pastikan path benar
-                type: 'GET',
-                data: { search: query },
-                success: function (data) {
-                    $searchResults.html(data);
-                },
-                error: function (jqXHR, textStatus, errorThrown) {
-                    $searchResults.html('<p>Terjadi kesalahan saat melakukan pencarian: ' + textStatus + ' - ' + errorThrown + '</p>');
-                    console.error('AJAX Error:', textStatus, errorThrown);
-                    console.error('Response Text:', jqXHR.responseText);
+            // Menyembunyikan autocomplete saat klik di luar
+            $(document).on('click', function(e) {
+                if (!$(e.target).closest('.search-bar').length) {
+                    $autocompleteResults.empty().hide();
                 }
             });
-        }
-
-        // Menyembunyikan autocomplete saat klik di luar
-        $(document).on('click', function (e) {
-            if (!$(e.target).closest('.search-bar').length) {
-                $autocompleteResults.empty().hide();
-            }
+            // Fungsi untuk menangani klik pada kategori
+            $('li').on('click', function() {
+                var category = $(this).attr('id'); // Ambil ID kategori yang dipilih
+                // AJAX request untuk mengambil artikel berdasarkan kategori
+                $.ajax({
+                    url: 'filter-news.php', // PHP file untuk mencari berdasarkan kategori
+                    type: 'GET',
+                    data: {
+                        category: category // Kirimkan kategori yang dipilih
+                    },
+                    success: function(data) {
+                        $('#search-results').html(data); // Tampilkan hasil pencarian pada elemen #search-results
+                    }
+                });
+            });
         });
-    });
-</script>
+    </script>
 
 
     <script src="sidebar-script.js"></script>
