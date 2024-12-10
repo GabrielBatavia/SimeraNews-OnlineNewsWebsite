@@ -33,7 +33,7 @@
             <li><img src="../asset/icon/stack.svg" alt=""><a href="#"><span>Following</span></a></li>
             <li><img src="../asset/icon/lightbulb.svg" alt=""><a href="#"><span>Suggestion</span></a></li>
             <li>
-            <li><img src="../asset/icon/signIn.png" alt=""><a href="../login.php"><span>Log In/Sign In</span></a></li>
+            <li><img src="../asset/icon/signIn.png" alt=""><a href="../admin/logout.php"><span>Log In/Sign In</span></a></li>
             <li>
                 <div class="divider"></div>
             </li>
