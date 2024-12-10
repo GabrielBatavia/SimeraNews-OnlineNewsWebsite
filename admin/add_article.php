@@ -2,35 +2,54 @@
 // add_article.php
 
 session_start();
+
+// Cek apakah admin sudah login
 if (!isset($_SESSION['admin_logged_in'])) {
     header('Location: login.php');
     exit;
 }
 
-require '../includes/db.php'; // MongoDB connection
+require '../includes/db.php'; 
 
-// Handle form submission
+// Inisialisasi variabel untuk pesan error
+$error = '';
+
+// Handle pengiriman form
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Validasi dan sanitasi input
-    $title = trim($_POST['title']);
-    $content = trim($_POST['content']);
-    $summary = trim($_POST['summary']);
-    $author = trim($_POST['author']);
-    $category = trim($_POST['category']);
+    // Validasi dan sanitasi input menggunakan filter
+    $title = filter_input(INPUT_POST, 'title', FILTER_SANITIZE_STRING);
+    $content = filter_input(INPUT_POST, 'content', FILTER_SANITIZE_STRING);
+    $summary = filter_input(INPUT_POST, 'summary', FILTER_SANITIZE_STRING);
+    $author = filter_input(INPUT_POST, 'author', FILTER_SANITIZE_STRING);
+    $category = filter_input(INPUT_POST, 'category', FILTER_SANITIZE_STRING);
+    $client_time = filter_input(INPUT_POST, 'client_time', FILTER_SANITIZE_STRING);
 
-    // Validasi sederhana
-    if ($title && $content && $summary && $author && $category) {
-        $article = [
-            'title' => $title,
-            'content' => $content,
-            'summary' => $summary,
-            'author' => $author,
-            'category' => $category,
-            'created_at' => new MongoDB\BSON\UTCDateTime(),
-            'updated_at' => new MongoDB\BSON\UTCDateTime(),
-        ];
-
+    // Validasi bahwa semua bidang terisi
+    if ($title && $content && $summary && $author && $category && $client_time) {
         try {
+            // Parse waktu dari klien menggunakan konstruktor DateTime
+            $dateTime = new DateTime($client_time);
+            // Konversi waktu UTC
+            $dateTime->setTimezone(new DateTimeZone('Asia/Jakarta'));
+            $dateTime->modify('+7 hours');
+            $timestamp = $dateTime->getTimestamp() * 1000; 
+
+            // Buat objek UTCDateTime
+            $createdAt = new MongoDB\BSON\UTCDateTime($timestamp);
+            $updatedAt = new MongoDB\BSON\UTCDateTime($timestamp);
+
+            // Buat array artikel
+            $article = [
+                'title' => $title,
+                'content' => $content,
+                'summary' => $summary,
+                'author' => $author,
+                'category' => $category,
+                'created_at' => $createdAt,
+                'updated_at' => $updatedAt,
+            ];
+
+            // Insert artikel ke koleksi MongoDB
             $result = $newsCollection->insertOne($article);
             $_SESSION['message'] = "Artikel berhasil ditambahkan dengan ID: " . $result->getInsertedId();
             header('Location: admin_dashboard.php');
@@ -67,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <div class="container mt-4">
     <h2>Tambah Artikel Baru</h2>
 
-    <?php if (isset($error)): ?>
+    <?php if (!empty($error)): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <?php echo htmlspecialchars($error); ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
@@ -75,6 +94,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <form method="POST" action="add_article.php">
+        <!-- Input Tersembunyi untuk Waktu Klien -->
+        <input type="hidden" name="client_time" id="client_time">
+
         <div class="mb-3">
             <label for="title" class="form-label">Judul</label>
             <input type="text" class="form-control" id="title" name="title" required value="<?php echo isset($_POST['title']) ? htmlspecialchars($_POST['title']) : ''; ?>">
@@ -108,6 +130,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <!-- Bootstrap JS Bundle -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- JavaScript untuk Mengatur Waktu Klien -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Ambil waktu lokal klien dalam format ISO 8601
+        var clientTime = new Date().toISOString();
+        // Set nilai input tersembunyi dengan waktu klien
+        document.getElementById('client_time').value = clientTime;
+    });
+</script>
+</script>
 
 </body>
 </html>

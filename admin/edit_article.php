@@ -133,9 +133,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="mb-3">
             <label for="category" class="form-label">Kategori</label>
             <select class="form-select" id="category" name="category" required>
-                <option value="Politics" <?php echo ($article['category'] == 'Politics') ? 'selected' : ''; ?>>Politik</option>
-                <option value="Technology" <?php echo ($article['category'] == 'Technology') ? 'selected' : ''; ?>>Teknologi</option>
-                <option value="Sports" <?php echo ($article['category'] == 'Sports') ? 'selected' : ''; ?>>Olahraga</option>
+                <option value="Politik" <?php echo ($article['category'] == 'Politics') ? 'selected' : ''; ?>>Politik</option>
+                <option value="Teknologi" <?php echo ($article['category'] == 'Technology') ? 'selected' : ''; ?>>Teknologi</option>
+                <option value="Olahraga" <?php echo ($article['category'] == 'Sports') ? 'selected' : ''; ?>>Olahraga</option>
                 <!-- Tambahkan kategori lain sesuai kebutuhan -->
             </select>
         </div>

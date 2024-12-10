@@ -1,8 +1,7 @@
 <?php
 // autocomplete.php - Endpoint untuk autocomplete
 
-require 'db.php'; // Pastikan path sesuai dengan struktur direktori Anda
-
+require 'db.php'; 
 header('Content-Type: application/json');
 
 // Mendapatkan query partial dari GET request
@@ -15,7 +14,7 @@ if (!empty($partialQuery)) {
     // Menggunakan regex untuk pencarian case-insensitive pada judul
     $cursor = $newsCollection->find(
         ['title' => new MongoDB\BSON\Regex('^' . preg_quote($partialQuery), 'i')],
-        ['limit' => 5] // Batasi jumlah saran yang dikembalikan
+        ['limit' => 10] 
     );
 
     foreach ($cursor as $doc) {

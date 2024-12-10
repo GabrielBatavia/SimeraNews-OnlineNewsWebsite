@@ -1,9 +1,8 @@
 <?php
 // search.php (Backend for handling search queries)
-ini_set('display_errors', 1); // Aktifkan display errors untuk debugging
-error_reporting(E_ALL);
+ini_set('display_errors', 1); 
 
-require __DIR__ . '/db.php'; // Perbaiki path require
+require __DIR__ . '/db.php'; 
 require '../public/img-logic.php';
 
 // Get the search query from the GET request
@@ -11,11 +10,11 @@ $searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
 
 // Check if search query is empty
 if (!empty($searchQuery)) {
-    // Perform a simple regex search for matching titles or content
+    // simple regex 
     $articles = $newsCollection->find([
         '$or' => [
-            ['title' => new MongoDB\BSON\Regex($searchQuery, 'i')],  // Search for title
-            ['content' => new MongoDB\BSON\Regex($searchQuery, 'i')]  // Search for content
+            ['title' => new MongoDB\BSON\Regex($searchQuery, 'i')],  
+            ['content' => new MongoDB\BSON\Regex($searchQuery, 'i')]  
         ]
     ]);
 
@@ -25,7 +24,6 @@ if (!empty($searchQuery)) {
     // Display the results
     foreach ($articles as $article) {
         $hasResults = true;
-        // Asumsi bahwa ada field 'image' yang menyimpan URL gambar artikel
         $imgCard = getImg($article);
 ?>
         <a class="col-12 col-md-6 col-lg-4 mt-3" href="view.php?id=<?php echo $article['_id']; ?>" style="color: inherit; text-decoration: none;"> <!-- Make it responsive -->

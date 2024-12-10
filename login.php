@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             <div class="d-flex justify-content-between mb-3">
                 <div class=""></div>
-                <a href="forgot-password.php" class="text-muted" style="font-size: 12px;">Forgot Password?</a>
+                <a href="#" class="text-muted" style="font-size: 12px;">Forgot Password?</a>
             </div>
             <button type="submit" class="btn btn-primary col-12 mb-2">Login</button>
             <div class="d-flex justify-content-between mb-2">
