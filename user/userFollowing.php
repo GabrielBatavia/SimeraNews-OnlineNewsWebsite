@@ -26,6 +26,41 @@ foreach ($articles as $article) {
     }
 }
 
+// Function to get random image for author (stored in session)
+function getRandomAuthorImage($author, $imageDir)
+{
+    // Check if the image for the author is already set in session
+    if (!isset($_SESSION['author_images'][$author])) {
+        $images = glob($imageDir . '/*.png'); // Fetch all .png images from the directory
+        if (empty($images)) {
+            return '../asset/author-image/image1.png'; // Default image if no images are available
+        }
+        $_SESSION['author_images'][$author] = $images[array_rand($images)]; // Store random image in session
+    }
+    return $_SESSION['author_images'][$author]; // Return the stored image
+}
+
+// Function to handle follow/unfollow action and count followers
+if (isset($_GET['follow_author'])) {
+    $authorName = $_GET['follow_author'];
+    if (!isset($_SESSION['followed_authors'])) {
+        $_SESSION['followed_authors'] = [];
+    }
+    
+    // Toggle follow/unfollow
+    if (in_array($authorName, $_SESSION['followed_authors'])) {
+        // Unfollow
+        $_SESSION['followed_authors'] = array_diff($_SESSION['followed_authors'], [$authorName]);
+    } else {
+        // Follow
+        $_SESSION['followed_authors'][] = $authorName;
+    }
+}
+
+$followedCount = isset($_SESSION['followed_authors']) ? count($_SESSION['followed_authors']) : 0;
+
+// Define the directory for author images
+$authorImageDir = '../asset/author-image';
 ?>
 
 <!DOCTYPE html>
@@ -52,24 +87,6 @@ foreach ($articles as $article) {
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        .article-card .card-text {
-            height: 60px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .recommendation-content .card-title {
-            font-size: 1.1rem;
-            font-weight: bold;
-        }
-
-        .search-bar input {
-            border: none;
-            border-radius: 0;
-            box-shadow: none;
-            font-size: 1rem;
-        }
-
         .author-card {
             margin: 10px 0;
         }
@@ -84,6 +101,7 @@ foreach ($articles as $article) {
 
         .author-card .card:hover {
             transform: translateY(-5px);
+            background-color: rgb(222, 222, 222);
         }
 
         .author-card .card-body {
@@ -114,6 +132,11 @@ foreach ($articles as $article) {
             color: inherit;
             text-decoration: none;
         }
+
+        .follow-btn.followed {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 
@@ -128,7 +151,8 @@ foreach ($articles as $article) {
             <img src="../asset/icon/person.jpg" alt="">
             <p>
                 <span class="nama-header">Mahmoed</span><br>
-                <span class="status-header">User</span>
+                <span class="status-header">User</span><br>
+                <span class="status-header">Followed Authors: <?php echo $followedCount; ?></span>
             </p>
         </div>
 
@@ -150,6 +174,7 @@ foreach ($articles as $article) {
     <div class="content">
         <div class="navbar">
             <img src="../asset/icon/list.svg" id="menu-toggle" alt="">
+
             <div class="nav-btn-group">
                 <ul>
                     <li class="nav-btn active">Top Stories</li>
@@ -174,7 +199,6 @@ foreach ($articles as $article) {
         <!-- Main content -->
         <div class="main-content">
             <div class="main-content-news container mt-3">
-                <!-- Display Author List as Cards -->
                 <div class="row">
                     <div class="col-12">
                         <h3>Follow Authors</h3>
@@ -184,9 +208,14 @@ foreach ($articles as $article) {
                                     <a href="author.php?name=<?php echo urlencode($author); ?>">
                                         <div class="card">
                                             <div class="card-body">
-                                                <img src="../asset/icon/person-placeholder.png" alt="Author Image">
+                                                <!-- Display the random image from session -->
+                                                <img src="<?php echo getRandomAuthorImage($author, $authorImageDir); ?>" alt="Author Image">
                                                 <h5 class="card-title"><?php echo htmlspecialchars($author); ?></h5>
                                                 <p class="card-text">Articles: <?php echo $articleCount; ?></p>
+                                                <!-- Follow button toggles between Follow and Unfollow -->
+                                                <a href="?follow_author=<?php echo urlencode($author); ?>" class="btn follow-btn <?php echo in_array($author, $_SESSION['followed_authors']) ? 'followed' : ''; ?>">
+                                                    <?php echo in_array($author, $_SESSION['followed_authors']) ? 'Unfollow' : 'Follow'; ?>
+                                                </a>
                                             </div>
                                         </div>
                                     </a>
