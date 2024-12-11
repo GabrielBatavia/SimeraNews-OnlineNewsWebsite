@@ -6,4 +6,5 @@ use MongoDB\Client;
 $client = new Client("mongodb://localhost:27017");
 $db = $client->news_db; 
 $newsCollection = $db->news;  
+$commentsCollection = $db->selectCollection('comments'); // Koleksi komentar
 ?>

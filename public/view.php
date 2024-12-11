@@ -22,6 +22,42 @@ if ($article === null) {
     echo "<p>Article not found or invalid ID.</p>";
     exit;
 }
+
+
+// Tangani Pengiriman Komentar
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Dapatkan isi komentar
+    $commentContent = trim($_POST['comment']);
+    if (!empty($commentContent)) {
+        // Dapatkan informasi pengguna jika tersedia
+        // Misalnya, jika Anda memiliki sistem login, dapatkan nama pengguna dari session
+        // Untuk saat ini, kita gunakan 'Anonymous'
+        $username = 'Anonymous'; // Ganti sesuai dengan sistem autentikasi Anda
+
+        // Buat dokumen komentar
+        $comment = [
+            'article_id' => new MongoDB\BSON\ObjectId($articleId),
+            'username' => $username,
+            'content' => $commentContent,
+            'created_at' => new MongoDB\BSON\UTCDateTime()
+        ];
+
+        // Masukkan ke koleksi komentar
+        $commentsCollection->insertOne($comment);
+
+        // Redirect untuk menghindari resubmission form
+        header("Location: view.php?id=" . $articleId);
+        exit;
+    }
+}
+
+// Ambil komentar untuk artikel ini
+$comments = $commentsCollection->find(
+    ['article_id' => new MongoDB\BSON\ObjectId($articleId)],
+    ['sort' => ['created_at' => -1]]
+);
+
+
 ?>
 
 <!DOCTYPE html>
@@ -105,6 +141,48 @@ if ($article === null) {
                     <p class="m-3 mt-0 mb-2"><small>By <?php echo htmlspecialchars($article['author']); ?> | Category: <?php echo htmlspecialchars($article['category']); ?> | Published on <?php echo $article['created_at']->toDateTime()->format('Y-m-d H:i'); ?></small></p>
                     <p class="m-3 mt-0"><?php echo nl2br(htmlspecialchars($article['content'])); ?></p>
                 </div>
+
+            <!-- Bagian Komentar -->
+            <div class="comments-section m-3">
+                <h3>Komentar</h3>
+                <div class="existing-comments mb-4">
+                    <?php 
+                    if ($comments->isDead()) {
+                        echo '<p>Belum ada komentar. Jadilah yang pertama untuk berkomentar!</p>';
+                    } else {
+                        foreach ($comments as $comment): 
+                    ?>
+                            <div class="comment mb-3 p-3 bg-light rounded shadow-sm">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong><?php echo htmlspecialchars($comment['username']); ?></strong>
+                                    <small class="comment-date">
+                                    <?php 
+                                        // Konversi tanggal ke UTC+7
+                                        echo $comment['created_at']->toDateTime()
+                                            ->setTimezone(new DateTimeZone('Asia/Jakarta'))
+                                            ->format('Y-m-d H:i'); 
+                                    ?>
+                                </small>
+                                </div>
+                                <p class="mb-0"><?php echo nl2br(htmlspecialchars($comment['content'])); ?></p>
+                            </div>
+                    <?php 
+                        endforeach; 
+                    }
+                    ?>
+                </div>
+                <div class="add-comment">
+                    <h4>Tambahkan Komentar</h4>
+                    <form action="view.php?id=<?php echo htmlspecialchars($articleId); ?>" method="POST">
+                        <div class="mb-3">
+                            <textarea class="form-control" name="comment" rows="3" required placeholder="Tulis komentar Anda di sini..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Kirim Komentar</button>
+                    </form>
+                </div>
+            </div>
+
+
             </div>
 
             <div class="recommendation-content">
