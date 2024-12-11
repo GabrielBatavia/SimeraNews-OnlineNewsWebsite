@@ -9,16 +9,34 @@ if (isset($_GET['id'])) {
 
     // Validate the article ID
     if (preg_match('/^[a-f0-9]{24}$/', $articleId)) {  // Check if the ID is a valid MongoDB ObjectId
-        $article = $newsCollection->findOne(['_id' => new MongoDB\BSON\ObjectId($articleId)]);
-        $articleImg = getImg($article);
+        $objectId = new MongoDB\BSON\ObjectId($articleId); // Inisialisasi objectId
+        
+        $article = $newsCollection->findOne(['_id' => $objectId]);
+        
+        if ($article) {
+            // Increment the views count
+            $newsCollection->updateOne(
+                ['_id' => $objectId],
+                ['$inc' => ['views' => 1]]
+            );
+
+            // Refresh the article data to get the updated views
+            $article = $newsCollection->findOne(['_id' => $objectId]);
+
+            // Sekarang baru panggil getImg setelah yakin $article tidak null
+            $articleImg = getImg($article);
+        } else {
+            // Jika artikel tidak ditemukan
+            $article = null;
+        }
     } else {
         // Invalid ID format
         $article = null;
     }
 }
 
+// Jika artikel tetap null, tampilkan pesan kesalahan
 if ($article === null) {
-    // If no article is found, show an error message
     echo "<p>Article not found or invalid ID.</p>";
     exit;
 }
@@ -30,8 +48,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $commentContent = trim($_POST['comment']);
     if (!empty($commentContent)) {
         // Dapatkan informasi pengguna jika tersedia
-        // Misalnya, jika Anda memiliki sistem login, dapatkan nama pengguna dari session
-        // Untuk saat ini, kita gunakan 'Anonymous'
         $username = 'Anonymous'; // Ganti sesuai dengan sistem autentikasi Anda
 
         // Buat dokumen komentar
@@ -56,7 +72,6 @@ $comments = $commentsCollection->find(
     ['article_id' => new MongoDB\BSON\ObjectId($articleId)],
     ['sort' => ['created_at' => -1]]
 );
-
 
 ?>
 

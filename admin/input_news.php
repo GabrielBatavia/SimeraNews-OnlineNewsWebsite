@@ -16,6 +16,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'summary' => $summary,
         'author' => $author,
         'category' => $category,
+        'views' => 0,
         'created_at' => new MongoDB\BSON\UTCDateTime(),  // Automatically set the current timestamp
         'updated_at' => new MongoDB\BSON\UTCDateTime(),
     ];

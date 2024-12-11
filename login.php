@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } elseif ($_POST['username'] == $userUsername && $_POST['password'] == $userPassword) {
         // User login
         $_SESSION['user_logged_in'] = true;
-        header('Location: user/user_dashboard.php');  // Redirect to user dashboard
+        header('Location: public/index.php');  // Redirect to user dashboard
         exit;
     } else {
         $error = "Invalid username or password.";

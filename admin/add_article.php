@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'content' => $content,
                 'summary' => $summary,
                 'author' => $author,
+                'views' => 0,
                 'category' => $category,
                 'created_at' => $createdAt,
                 'updated_at' => $updatedAt,
