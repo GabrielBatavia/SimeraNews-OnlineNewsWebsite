@@ -1,5 +1,5 @@
 <?php
-// User dashboard
+// User Following
 session_start();
 if (!isset($_SESSION['user_logged_in'])) {
     header('Location: ../login.php');
@@ -43,6 +43,7 @@ foreach ($articles as $article) {
             font-size: 1.2rem;
             font-weight: bold;
         }
+
         .main-content {
             margin-top: 20px;
             background-color: #f8f9fa;
@@ -68,6 +69,51 @@ foreach ($articles as $article) {
             box-shadow: none;
             font-size: 1rem;
         }
+
+        .author-card {
+            margin: 10px 0;
+        }
+
+        .author-card .card {
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            transition: transform 0.2s;
+        }
+
+        .author-card .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .author-card .card-body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .author-card .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .author-card .card-text {
+            font-size: 0.9rem;
+            color: #555;
+        }
+
+        .author-card img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+
+        .row a {
+            color: inherit;
+            text-decoration: none;
+        }
     </style>
 </head>
 
@@ -87,13 +133,17 @@ foreach ($articles as $article) {
         </div>
 
         <ul class="sidebar-menu">
-            <li><div class="divider"></div></li>
-            <li><img src="../asset/icon/house.svg" alt=""><a href="#"><span>Home</span></a></li>
+            <li>
+                <div class="divider"></div>
+            </li>
+            <li><img src="../asset/icon/house.svg" alt=""><a href="user_dashboard.php"><span>Home</span></a></li>
             <li><img src="../asset/icon/sparkle.svg" alt=""><a href="#"><span>For You</span></a></li>
             <li><img src="../asset/icon/stack.svg" alt=""><a href="userFollowing.php"><span>Following</span></a></li>
             <li><img src="../asset/icon/lightbulb.svg" alt=""><a href="#"><span>Suggestions</span></a></li>
             <li><img src="../asset/icon/box-arrow-left.svg" alt=""><a href="user_dashboard.php?logout=true"><span>Log out</span></a></li>
-            <li><div class="divider"></div></li>
+            <li>
+                <div class="divider"></div>
+            </li>
         </ul>
     </div>
 
@@ -124,52 +174,55 @@ foreach ($articles as $article) {
         <!-- Main content -->
         <div class="main-content">
             <div class="main-content-news container mt-3">
-                <!-- Display Author List -->
+                <!-- Display Author List as Cards -->
                 <div class="row">
                     <div class="col-12">
                         <h3>Follow Authors</h3>
-                        <ul class="author-list">
+                        <div class="row">
                             <?php foreach ($authors as $author => $articleCount) : ?>
-                                <li>
+                                <div class="col-md-4 author-card">
                                     <a href="author.php?name=<?php echo urlencode($author); ?>">
-                                        <?php echo htmlspecialchars($author); ?> 
-                                        <span>(<?php echo $articleCount; ?> articles)</span>
+                                        <div class="card">
+                                            <div class="card-body">
+                                                <img src="../asset/icon/person-placeholder.png" alt="Author Image">
+                                                <h5 class="card-title"><?php echo htmlspecialchars($author); ?></h5>
+                                                <p class="card-text">Articles: <?php echo $articleCount; ?></p>
+                                            </div>
+                                        </div>
                                     </a>
-                                </li>
+                                </div>
                             <?php endforeach; ?>
-                        </ul>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        
-            <div class="recommendation-content">
-                <div class="col-12 mt-3"> <!-- Make it responsive -->
-                    <div class="card article-card">
-                        <div class="card-header bg-white">
-                            Trending Sections
-                        </div>
-                        <div class="recommend-list">
-                            <ul>
-                                <li id="politics">
-                                    <img src="../asset/icon/flag.svg" alt="">
-                                    <p>Politics</p>
-                                </li>
-                                <li id="technology">
-                                    <img src="../asset/icon/robot.svg" alt="">
-                                    <p>Technology</p>
-                                </li>
-                                <li id="sports">
-                                    <img src="../asset/icon/ball.svg" alt="">
-                                    <p>Sports</p>
-                                </li>
-                                <li id="all-category">
-                                    <img src="../asset/icon/hash.svg" alt="">
-                                    <p>All Category</p>
-                                </li>
-                            </ul>
-                        </div>
+        <div class="recommendation-content">
+            <div class="col-12 mt-3">
+                <div class="card article-card">
+                    <div class="card-header bg-white">
+                        Trending Sections
+                    </div>
+                    <div class="recommend-list">
+                        <ul>
+                            <li id="politics">
+                                <img src="../asset/icon/flag.svg" alt="">
+                                <p>Politics</p>
+                            </li>
+                            <li id="technology">
+                                <img src="../asset/icon/robot.svg" alt="">
+                                <p>Technology</p>
+                            </li>
+                            <li id="sports">
+                                <img src="../asset/icon/ball.svg" alt="">
+                                <p>Sports</p>
+                            </li>
+                            <li id="all-category">
+                                <img src="../asset/icon/hash.svg" alt="">
+                                <p>All Category</p>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
