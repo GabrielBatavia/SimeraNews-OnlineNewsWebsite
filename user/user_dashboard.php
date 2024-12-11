@@ -13,6 +13,7 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
+
 require '../includes/db.php'; // MongoDB connection
 
 // Fetch articles from MongoDB
@@ -74,7 +75,7 @@ $lastArticle = $newsCollection->findOne([], ['sort' => ['created_at' => -1]]);
 
         <ul class="sidebar-menu">
             <li><div class="divider"></div></li>
-            <li><img src="../asset/icon/house.svg" alt=""><a href="#"><span>Home</span></a></li>
+            <li><img src="../asset/icon/house.svg" alt=""><a href="user_dashboard.php"><span>Home</span></a></li>
             <li><img src="../asset/icon/sparkle.svg" alt=""><a href="#"><span>For You</span></a></li>
             <li><img src="../asset/icon/stack.svg" alt=""><a href="userFollowing.php"><span>Following</span></a></li>
             <li><img src="../asset/icon/lightbulb.svg" alt=""><a href="#"><span>Suggestions</span></a></li>
