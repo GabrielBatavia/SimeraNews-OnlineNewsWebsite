@@ -5,60 +5,29 @@ if (!isset($_SESSION['user_logged_in'])) {
     exit;
 }
 
-if (isset($_GET['logout'])) {
-    session_unset();    // Clear all session variables
-    session_destroy();  // Destroy the session
-    header('Location: ../login.php');  // Redirect to login page
-    exit;
-}
-
 require '../includes/db.php'; // MongoDB connection
 
-// Fetch articles from MongoDB
-$articles = $newsCollection->find([], ['projection' => ['author' => 1]]);
-$authors = [];
+// Get author name from URL parameter
+$authorName = isset($_GET['name']) ? $_GET['name'] : '';
 
-// Extract unique authors and count articles
-foreach ($articles as $article) {
-    if (isset($article['author'])) {
-        $authors[$article['author']] = isset($authors[$article['author']]) ? $authors[$article['author']] + 1 : 1;
-    }
-}
+// Fetch articles by the author
+$articles = $newsCollection->find(['author' => $authorName]);
 
-// Function to get random image for author (stored in session)
+// Function to get random image for the author
+$authorImageDir = '../asset/author-image';
 function getRandomAuthorImage($author, $imageDir)
 {
     if (!isset($_SESSION['author_images'][$author])) {
-        $images = glob($imageDir . '/*.png'); // Fetch all .png images from the directory
+        $images = glob($imageDir . '/*.png');
         if (empty($images)) {
-            return '../asset/author-image/image1.png'; // Default image if no images are available
+            return '../asset/author-image/image1.png'; // Default image
         }
-        $_SESSION['author_images'][$author] = $images[array_rand($images)]; // Store random image in session
+        $_SESSION['author_images'][$author] = $images[array_rand($images)];
     }
-    return $_SESSION['author_images'][$author]; // Return the stored image
-}
-
-// Function to handle follow/unfollow action and count followers
-if (isset($_GET['follow_author'])) {
-    $authorName = $_GET['follow_author'];
-    if (!isset($_SESSION['followed_authors'])) {
-        $_SESSION['followed_authors'] = [];
-    }
-    
-    // Toggle follow/unfollow
-    if (in_array($authorName, $_SESSION['followed_authors'])) {
-        // Unfollow
-        $_SESSION['followed_authors'] = array_diff($_SESSION['followed_authors'], [$authorName]);
-    } else {
-        // Follow
-        $_SESSION['followed_authors'][] = $authorName;
-    }
+    return $_SESSION['author_images'][$author];
 }
 
 $followedCount = isset($_SESSION['followed_authors']) ? count($_SESSION['followed_authors']) : 0;
-
-// Define the directory for author images
-$authorImageDir = '../asset/author-image';
 ?>
 
 <!DOCTYPE html>
@@ -139,11 +108,13 @@ $authorImageDir = '../asset/author-image';
 </head>
 
 <body>
-    <div class="sidebar">
+<div class="sidebar">
         <div class="sidebar-logo"><img src="../asset/icon/app-logo.png" alt="logo"><p>Simera News</p></div>
             <div class="profile">
                 <img src="../asset/icon/person.jpg" alt="">
-                <p><span class="nama-header">Mahmoed</span><br><span class="status-header">User</span><br><span class="status-header">Followed Authors: <?php echo $followedCount; ?></span></p>
+                <p><span class="nama-header">Mahmoed</span><br>
+                <span class="status-header">User</span><br>
+                <span class="status-header">Followed Authors: <?php echo $followedCount; ?></span></p>
             </div>
             <ul class="sidebar-menu">
                 <li><div class="divider"></div></li>
@@ -178,32 +149,25 @@ $authorImageDir = '../asset/author-image';
             </div>
         </div>
 
-            <!-- Main content -->
-            <div class="main-content">
-                <div class="container mt-3">
-                    <div class="row">
-                        <div class="col-12">
-                            <h3>Follow Authors</h3>
-                            <div class="row">
-                                <?php foreach ($authors as $author => $articleCount) : ?>
-                                    <div class="col-md-4 author-card">
-                                        <a href="author.php?name=<?php echo urlencode($author); ?>">
-                                            <div class="card">
-                                                <div class="card-body">
-                                                    <img src="<?php echo getRandomAuthorImage($author, $authorImageDir); ?>" alt="Author Image">
-                                                    <h5 class="card-title"><?php echo htmlspecialchars($author); ?></h5>
-                                                    <p class="card-text">Articles: <?php echo $articleCount; ?></p>
-                                                    <a href="?follow_author=<?php echo urlencode($author); ?>" class="btn follow-btn <?php echo in_array($author, $_SESSION['followed_authors']) ? 'followed' : ''; ?>">
-                                                        <?php echo in_array($author, $_SESSION['followed_authors']) ? 'Unfollow' : 'Follow'; ?>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                <?php endforeach; ?>
+        <div class="main-content">
+            <div class="container mt-5">
+                <h1>Articles by <?php echo htmlspecialchars($authorName); ?></h1>
+                <div class="author-details">
+                    <img src="<?php echo getRandomAuthorImage($authorName, $authorImageDir); ?>" alt="Author Image" width="100" height="100">
+                    <p>Author: <?php echo htmlspecialchars($authorName); ?></p>
+                </div>
+                <h3>Articles</h3>
+                <div class="row">
+                    <?php foreach ($articles as $article): ?>
+                        <div class="col-md-4">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title"><?php echo htmlspecialchars($article['title']); ?></h5>
+                                    <p class="card-text"><?php echo htmlspecialchars($article['summary']); ?></p>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    <?php endforeach; ?>
                 </div>
             </div>
         </div>

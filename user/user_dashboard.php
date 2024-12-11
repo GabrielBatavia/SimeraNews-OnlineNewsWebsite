@@ -153,7 +153,6 @@ if (!empty($searchQuery)) {
             <li><img src="../asset/icon/house.svg" alt=""><a href="user_dashboard.php"><span>Home</span></a></li>
             <li><img src="../asset/icon/sparkle.svg" alt=""><a href="#"><span>For You</span></a></li>
             <li><img src="../asset/icon/stack.svg" alt=""><a href="userFollowing.php"><span>Following</span></a></li>
-            <li><img src="../asset/icon/lightbulb.svg" alt=""><a href="#"><span>Suggestions</span></a></li>
             <li><img src="../asset/icon/box-arrow-left.svg" alt=""><a href="user_dashboard.php?logout=true"><span>Log out</span></a></li>
             <li><div class="divider"></div></li>
         </ul>

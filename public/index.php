@@ -126,7 +126,7 @@ if (!empty($searchQuery)) {
         </div>
 
         <div class="profile">
-            <img src="../asset/icon/person.jpg" alt="">
+            <img src="../asset/icon/blank.png" alt="">
             <p>
                 <span class="nama-header">Anonymous</span><br>
                 <span class="status-header">Log in/Sign In first</span>
@@ -139,7 +139,6 @@ if (!empty($searchQuery)) {
             <li><img src="../asset/icon/house.svg" alt=""><a href="#"><span>Home</span></a></li>
             <li><img src="../asset/icon/sparkle.svg" alt=""><a href="#"><span>For You</span></a></li>
             <li><img src="../asset/icon/stack.svg" alt=""><a href="#"><span>Following</span></a></li>
-            <li><img src="../asset/icon/lightbulb.svg" alt=""><a href="#"><span>Suggestion</span></a></li>
             <li></li>
             <li><img src="../asset/icon/signIn.png" alt=""><a href="../admin/logout.php"><span>Log In/Sign In</span></a></li>
             <li>
