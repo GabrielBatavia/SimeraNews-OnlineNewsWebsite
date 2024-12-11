@@ -25,38 +25,70 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $client_time = filter_input(INPUT_POST, 'client_time', FILTER_SANITIZE_STRING);
 
     // Validasi bahwa semua bidang terisi
-    if ($title && $content && $summary && $author && $category && $client_time) {
-        try {
-            // Parse waktu dari klien menggunakan konstruktor DateTime
-            $dateTime = new DateTime($client_time);
-            // Konversi waktu UTC
-            $dateTime->setTimezone(new DateTimeZone('Asia/Jakarta'));
-            $dateTime->modify('+7 hours');
-            $timestamp = $dateTime->getTimestamp() * 1000; 
+    if ($title && $content && $summary && $author && $category && $client_time && isset($_FILES['image'])) {
+        // Validasi dan proses gambar
+        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+        if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
+            if (in_array($_FILES['image']['type'], $allowedTypes)) {
+                // Tentukan direktori penyimpanan gambar
+                $uploadDir = '../uploads/';
+                if (!is_dir($uploadDir)) {
+                    mkdir($uploadDir, 0755, true);
+                }
 
-            // Buat objek UTCDateTime
-            $createdAt = new MongoDB\BSON\UTCDateTime($timestamp);
-            $updatedAt = new MongoDB\BSON\UTCDateTime($timestamp);
+                // Buat nama file unik
+                $fileExt = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                $fileName = uniqid() . '.' . $fileExt;
+                $filePath = $uploadDir . $fileName;
 
-            // Buat array artikel
-            $article = [
-                'title' => $title,
-                'content' => $content,
-                'summary' => $summary,
-                'author' => $author,
-                'views' => 0,
-                'category' => $category,
-                'created_at' => $createdAt,
-                'updated_at' => $updatedAt,
-            ];
+                // Pindahkan file ke direktori tujuan
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $filePath)) {
+                    // Simpan path relatif gambar
+                    $imagePath = 'uploads/' . $fileName;
+                } else {
+                    $error = "Gagal mengunggah gambar.";
+                }
+            } else {
+                $error = "Tipe file gambar tidak diperbolehkan.";
+            }
+        } else {
+            $error = "Terjadi kesalahan saat mengunggah gambar.";
+        }
 
-            // Insert artikel ke koleksi MongoDB
-            $result = $newsCollection->insertOne($article);
-            $_SESSION['message'] = "Artikel berhasil ditambahkan dengan ID: " . $result->getInsertedId();
-            header('Location: admin_dashboard.php');
-            exit;
-        } catch (Exception $e) {
-            $error = "Terjadi kesalahan: " . $e->getMessage();
+        if (empty($error)) {
+            try {
+                // Parse waktu dari klien menggunakan konstruktor DateTime
+                $dateTime = new DateTime($client_time);
+                // Konversi waktu UTC
+                $dateTime->setTimezone(new DateTimeZone('Asia/Jakarta'));
+                $dateTime->modify('+7 hours');
+                $timestamp = $dateTime->getTimestamp() * 1000; 
+
+                // Buat objek UTCDateTime
+                $createdAt = new MongoDB\BSON\UTCDateTime($timestamp);
+                $updatedAt = new MongoDB\BSON\UTCDateTime($timestamp);
+
+                // Buat array artikel
+                $article = [
+                    'title' => $title,
+                    'content' => $content,
+                    'summary' => $summary,
+                    'author' => $author,
+                    'views' => 0,
+                    'category' => $category,
+                    'image' => $imagePath, // Tambahkan path gambar
+                    'created_at' => $createdAt,
+                    'updated_at' => $updatedAt,
+                ];
+
+                // Insert artikel ke koleksi MongoDB
+                $result = $newsCollection->insertOne($article);
+                $_SESSION['message'] = "Artikel berhasil ditambahkan dengan ID: " . $result->getInsertedId();
+                header('Location: admin_dashboard.php');
+                exit;
+            } catch (Exception $e) {
+                $error = "Terjadi kesalahan: " . $e->getMessage();
+            }
         }
     } else {
         $error = "Semua bidang wajib diisi.";
@@ -94,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     <?php endif; ?>
 
-    <form method="POST" action="add_article.php">
+    <form method="POST" action="add_article.php" enctype="multipart/form-data">
         <!-- Input Tersembunyi untuk Waktu Klien -->
         <input type="hidden" name="client_time" id="client_time">
 
@@ -113,6 +145,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="mb-3">
             <label for="author" class="form-label">Penulis</label>
             <input type="text" class="form-control" id="author" name="author" required value="<?php echo isset($_POST['author']) ? htmlspecialchars($_POST['author']) : ''; ?>">
+        </div>
+         <!-- Tambahkan field gambar -->
+        <div class="mb-3">
+            <label for="image" class="form-label">Gambar</label>
+            <input type="file" class="form-control" id="image" name="image" accept="image/*" required>
         </div>
         <div class="mb-3">
             <label for="category" class="form-label">Kategori</label>
