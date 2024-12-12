@@ -161,7 +161,20 @@ if (!empty($searchQuery)) {
                 </ul>
             </div>
             <div class="search-etc">
-                <img src="../asset/icon/bell.svg" alt="">
+            <div style="position: relative; display: inline-block;">
+                <img id="notification-icon" src="../asset/icon/bell.svg" alt="Notifikasi" style="width:24px; height:24px; cursor: pointer;">
+                <span id="notification-badge" style="
+                    display: none;
+                    position: absolute;
+                    top: -5px;
+                    right: -5px;
+                    background: red;
+                    color: white;
+                    border-radius: 50%;
+                    padding: 2px 6px;
+                    font-size: 12px;
+                ">0</span>
+            </div>
                 <div class="separator" style="height: 20px; width: 1px; background-color: #D2D2D2"></div>
                 <img src="../asset/icon/chats.svg" alt="">
                 <div class="search-bar position-relative">
@@ -486,6 +499,60 @@ if (!empty($searchQuery)) {
                         console.error('Response Text:', jqXHR.responseText);
                     }
                 });
+            });
+        });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            // Inisialisasi waktu terakhir cek notifikasi
+            let lastChecked = Math.floor(Date.now() / 1000); // UNIX timestamp dalam detik
+
+            // Fungsi untuk memeriksa notifikasi baru
+            function checkNotifications() {
+                $.ajax({
+                    url: '../includes/check_notifications.php',
+                    type: 'GET',
+                    data: {
+                        last_checked: lastChecked
+                    },
+                    success: function (response) {
+                        if (response.error) {
+                            console.error(response.error);
+                            return;
+                        }
+
+                        if (response.count > 0) {
+                            // Tampilkan badge dengan jumlah notifikasi
+                            $('#notification-badge').text(response.count).show();
+                        } else {
+                            // Sembunyikan badge jika tidak ada notifikasi baru
+                            $('#notification-badge').hide();
+                        }
+
+                        // Perbarui lastChecked
+                        lastChecked = Math.floor(Date.now() / 1000);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error('Error memeriksa notifikasi:', textStatus, errorThrown);
+                    }
+                });
+            }
+
+            // Periksa notifikasi setiap 30 detik
+            setInterval(checkNotifications, 30000); // 30000 ms = 30 detik
+
+            // Periksa notifikasi saat halaman dimuat
+            checkNotifications();
+
+            // Opsional: Menambahkan event saat pengguna mengklik ikon notifikasi
+            $('#notification-icon').on('click', function () {
+                // Reset badge
+                $('#notification-badge').hide();
+                // Perbarui lastChecked
+                lastChecked = Math.floor(Date.now() / 1000);
+                // Bisa juga menambahkan logika tambahan, seperti membuka panel notifikasi
+                alert('Tidak ada notifikasi baru.');
             });
         });
     </script>
