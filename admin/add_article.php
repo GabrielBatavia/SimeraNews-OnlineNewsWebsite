@@ -83,6 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 // Insert artikel ke koleksi MongoDB
                 $result = $newsCollection->insertOne($article);
+                
                 $_SESSION['message'] = "Artikel berhasil ditambahkan dengan ID: " . $result->getInsertedId();
                 header('Location: admin_dashboard.php');
                 exit;

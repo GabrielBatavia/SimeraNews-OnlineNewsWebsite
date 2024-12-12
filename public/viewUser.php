@@ -48,7 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $commentContent = trim($_POST['comment']);
     if (!empty($commentContent)) {
         // Dapatkan informasi pengguna jika tersedia
-        $username = 'Anonymous'; // Ganti sesuai dengan sistem autentikasi Anda
+        $username = 'Mahmoed'; // Ganti sesuai dengan sistem autentikasi Anda
 
         // Buat dokumen komentar
         $comment = [
@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $commentsCollection->insertOne($comment);
 
         // Redirect untuk menghindari resubmission form
-        header("Location: view.php?id=" . $articleId);
+        header("Location: viewUser.php?id=" . $articleId);
         exit;
     }
 }
@@ -183,7 +183,7 @@ $comments = $commentsCollection->find(
                 </div>
                 <div class="add-comment">
                     <h4>Tambahkan Komentar</h4>
-                    <form action="view.php?id=<?php echo htmlspecialchars($articleId); ?>" method="POST">
+                    <form action="viewUser.php?id=<?php echo htmlspecialchars($articleId); ?>" method="POST">
                         <div class="mb-3">
                             <textarea class="form-control" name="comment" rows="3" required placeholder="Tulis komentar Anda di sini..."></textarea>
                         </div>
