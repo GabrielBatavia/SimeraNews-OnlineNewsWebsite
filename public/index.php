@@ -262,7 +262,7 @@ if (!empty($searchQuery)) {
                                 <a href="view.php?id=<?php echo htmlspecialchars($lastArticle['_id']); ?>" class="text-decoration-none text-reset">
                                     <div class="card">
                                         <div class="main-news card-body" style="background-image: url(<?php echo htmlspecialchars($imgMain); ?>); background-size: cover; background-position: center; height: 300px; position: relative;">
-                                            <span class="badge bg-warning text-dark">Trending</span>
+                                            <!-- <span class="badge bg-warning text-dark">Trending</span> -->
                                             <div class="overlay" style="position: absolute; bottom: 0; background: rgba(0,0,0,0.5); width: 100%; color: white; padding: 10px;">
                                                 <p class="card-title"><?php echo htmlspecialchars($lastArticle['category']); ?></p>
                                                 <h5 class="card-text"><?php echo htmlspecialchars($lastArticle['title']); ?></h5>
