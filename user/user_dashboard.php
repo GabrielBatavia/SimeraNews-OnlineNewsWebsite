@@ -14,12 +14,34 @@ if (isset($_GET['logout'])) {
 }
 
 
-require '../includes/db.php'; // MongoDB connection
+require '../includes/db.php'; // Sertakan koneksi DB
+require '../public/img-logic.php';
 
-// Fetch articles from MongoDB
-$searchQuery = isset($_GET['search']) ? ['$text' => ['$search' => $_GET['search']]] : [];
-$articles = $newsCollection->find($searchQuery, ['limit' => 10, 'sort' => ['created_at' => -1]]);
-$lastArticle = $newsCollection->findOne([], ['sort' => ['created_at' => -1]]);
+// Mendapatkan query pencarian dari GET request
+$searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
+
+// Mengambil Top 3 Trending Articles
+$topTrending = $newsCollection->find(
+    [],
+    [
+        'limit' => 3,
+        'sort' => ['views' => -1]
+    ]
+)->toArray();
+
+// Jika ada query pencarian, lakukan pencarian
+if (!empty($searchQuery)) {
+    // Melakukan pencarian dengan regex pada judul atau konten
+    $articles = $newsCollection->find([
+        '$or' => [
+            ['title' => new MongoDB\BSON\Regex($searchQuery, 'i')],
+            ['content' => new MongoDB\BSON\Regex($searchQuery, 'i')]
+        ]
+    ], ['limit' => 10, 'sort' => ['created_at' => -1]]);
+} else {
+    // Jika tidak ada pencarian, tampilkan artikel terbaru
+    $articles = $newsCollection->find([], ['limit' => 10, 'sort' => ['created_at' => -1]]);
+}
 ?>
 
 <!DOCTYPE html>
@@ -33,27 +55,80 @@ $lastArticle = $newsCollection->findOne([], ['sort' => ['created_at' => -1]]);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="../public/style-index.css">
     <style>
-        .main-news .card-title {
-            font-size: 1.2rem;
-            font-weight: bold;
+        .trending-section {
+            margin-bottom: 30px;
         }
 
-        .article-card .card-text {
-            height: 60px;
+        .trending-card {
+            position: relative;
             overflow: hidden;
-            text-overflow: ellipsis;
         }
 
-        .recommendation-content .card-title {
-            font-size: 1.1rem;
+        .trending-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background-color: #FF4500;
+            color: white;
+            padding: 5px 10px;
             font-weight: bold;
+            border-radius: 5px;
+            z-index: 1;
         }
 
-        .search-bar input {
-            border: none;
-            border-radius: 0;
-            box-shadow: none;
-            font-size: 1rem;
+        .trending-rank {
+            font-weight: bold;
+            color: #FF4500; /* Warna oranye untuk ranking */
+            margin-right: 10px;
+        }
+
+        .trending-views {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .recommend-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .recommend-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .recommend-list li img {
+            margin-right: 10px;
+        }
+
+        /* Styling untuk Top Trending List */
+        .trending-list ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .trending-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .trending-list a {
+            text-decoration: none;
+            color: #08080A;
+        }
+
+        .badge.bg-warning.text-dark {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            padding: 5px 10px;
+            font-size: 0.8em;
+            border-radius: 5px;
+            background-color: #FFD700;
+            color: #333;
         }
     </style>
 </head>
@@ -78,7 +153,6 @@ $lastArticle = $newsCollection->findOne([], ['sort' => ['created_at' => -1]]);
             <li><img src="../asset/icon/house.svg" alt=""><a href="user_dashboard.php"><span>Home</span></a></li>
             <li><img src="../asset/icon/sparkle.svg" alt=""><a href="#"><span>For You</span></a></li>
             <li><img src="../asset/icon/stack.svg" alt=""><a href="userFollowing.php"><span>Following</span></a></li>
-            <li><img src="../asset/icon/lightbulb.svg" alt=""><a href="#"><span>Suggestions</span></a></li>
             <li><img src="../asset/icon/box-arrow-left.svg" alt=""><a href="user_dashboard.php?logout=true"><span>Log out</span></a></li>
             <li><div class="divider"></div></li>
         </ul>
@@ -111,46 +185,75 @@ $lastArticle = $newsCollection->findOne([], ['sort' => ['created_at' => -1]]);
         <div class="main-content">
             <div class="main-content-news container mt-3">
 
+                <!-- Top Trending Topics -->
+                <div class="trending-section">
+                    <h3>Top 3 Trending Topics</h3>
+                    <div class="row">
+                        <?php foreach ($topTrending as $index => $trendingArticle): ?>
+                            <?php
+                                $imgTrending = getImg($trendingArticle);
+                            ?>
+                            <div class="col-12 col-md-4 mb-4">
+                                <a href="../public/viewUser.php?id=<?php echo htmlspecialchars($trendingArticle['_id']); ?>" style="color: inherit; text-decoration: none;">
+                                    <div class="card trending-card">
+                                        <span class="trending-badge">Trending</span>
+                                        <img src="<?php echo htmlspecialchars($imgTrending); ?>" class="card-img-top" alt="Trending Image" style="height: 200px; object-fit: cover;">
+                                        <div class="card-body">
+                                            <p class="group-card-category"><?php echo htmlspecialchars($trendingArticle['category']); ?></p>
+                                            <h5 class="group-card-title"><?php echo htmlspecialchars($trendingArticle['title']); ?></h5>
+                                        </div>
+                                        <div class="card-footer d-flex justify-content-between align-items-center">
+                                            <span class="text-muted"><?php echo htmlspecialchars($trendingArticle['author']); ?> - <?php echo $trendingArticle['created_at']->toDateTime()->format('d F Y'); ?></span>
+                                            <span class="trending-views"><?php echo $trendingArticle['views']; ?> views</span>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+
                 <!-- Display Articles -->
                 <div class="row" id="search-results">
                     <?php
-                    require '../includes/db.php'; // Sertakan koneksi DB
-                    require '../public/img-logic.php';
-
-                    // Mendapatkan query pencarian dari GET request
-                    $searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
-
                     if (!empty($searchQuery)) {
-                        // Melakukan pencarian dengan regex pada judul atau konten
-                        $articles = $newsCollection->find([
-                            '$or' => [
-                                ['title' => new MongoDB\BSON\Regex($searchQuery, 'i')],
-                                ['content' => new MongoDB\BSON\Regex($searchQuery, 'i')]
-                            ]
-                        ], ['limit' => 10, 'sort' => ['created_at' => -1]]);
-
                         // Menampilkan hasil pencarian
                         $hasResults = false;
                         foreach ($articles as $article) {
                             $hasResults = true;
                             $imgCard = getImg($article);
                     ?>
-                            <a class="col-12 col-md-6 col-lg-4 mt-3" href="view.php?id=<?php echo $article['_id']; ?>" style="color: inherit; text-decoration: none;"> <!-- Make it responsive -->
-                                <div class="card article-card">
-                                    <img src="<?php echo htmlspecialchars($imgCard); ?>" class="card-img-top" alt="Card image" style="height: 200px; object-fit: cover;"> <!-- Add the image -->
-                                    <div class="card-body">
-                                        <p class="group-card-category"><?php echo htmlspecialchars($article['category']); ?></p>
-                                        <p class="group-card-title"><?php echo htmlspecialchars($article['title']); ?></p>
-                                    </div>
-                                    <div class="card-footer d-flex justify-content-between align-items-center">
-                                        <span class="text-muted"><?php echo htmlspecialchars($article['author']); ?> - <?php echo $article['created_at']->toDateTime()->format('d F Y'); ?></span> <!-- Assuming there's an author -->
-                                        <div class="right">
-                                            <img src="../asset/icon/heart-black.svg" alt="ppp" style="width: 20px; height: 20px; margin-right: 10px;">
-                                            <img src="../asset/icon/share-black.svg" alt="ppp" style="width: 20px; height: 20px; margin-bottom: 2px;">
+                            <div class="col-12 col-md-6 col-lg-4 mt-3">
+                                <a href="../public/viewUser.php?id=<?php echo $article['_id']; ?>" style="color: inherit; text-decoration: none;">
+                                    <div class="card article-card">
+                                        <?php
+                                            // Cek apakah artikel ini adalah trending
+                                            $isTrending = false;
+                                            foreach ($topTrending as $trending) {
+                                                if ($article['_id'] == $trending['_id']) {
+                                                    $isTrending = true;
+                                                    break;
+                                                }
+                                            }
+                                        ?>
+                                        <?php if ($isTrending): ?>
+                                            <span class="badge bg-warning text-dark">Trending</span>
+                                        <?php endif; ?>
+                                        <img src="<?php echo htmlspecialchars($imgCard); ?>" class="card-img-top" alt="Card image" style="height: 200px; object-fit: cover;">
+                                        <div class="card-body">
+                                            <p class="group-card-category"><?php echo htmlspecialchars($article['category']); ?></p>
+                                            <p class="group-card-title"><?php echo htmlspecialchars($article['title']); ?></p>
+                                        </div>
+                                        <div class="card-footer d-flex justify-content-between align-items-center">
+                                            <span class="text-muted"><?php echo htmlspecialchars($article['author']); ?> - <?php echo $article['created_at']->toDateTime()->format('d F Y'); ?></span>
+                                            <div class="right">
+                                                <img src="../asset/icon/heart-black.svg" alt="Like" style="width: 20px; height: 20px; margin-right: 10px;">
+                                                <img src="../asset/icon/share-black.svg" alt="Share" style="width: 20px; height: 20px; margin-bottom: 2px;">
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </a>
+                                </a>
+                            </div>
                         <?php
                         }
 
@@ -158,49 +261,70 @@ $lastArticle = $newsCollection->findOne([], ['sort' => ['created_at' => -1]]);
                             echo '<p>No articles found for your search.</p>';
                         }
                     } else {
-                        // Jika tidak ada pencarian, tampilkan artikel terbaru atau sesuai kebutuhan Anda
+                        // Jika tidak ada pencarian, tampilkan artikel terbaru
+                        // Menampilkan artikel terbaru pertama dengan tampilan berbeda
                         $lastArticle = $newsCollection->findOne([], ['sort' => ['created_at' => -1]]);
-                        $imgMain = getImg($lastArticle);
+                        if ($lastArticle) {
+                            $imgMain = getImg($lastArticle);
                         ?>
-                        <a href="view.php?id=<?php echo htmlspecialchars($lastArticle['_id']); ?>" class="text-decoration-none text-reset">
-                            <div class="card">
-                                <div class="main-news card-body" style="background-image: url(<?php echo $imgMain ?>)">
-                                    <p class="card-title"><?php echo htmlspecialchars($lastArticle['category']); ?></p>
-                                    <h5 class="card-text"><?php echo htmlspecialchars($lastArticle['title']); ?></h5>
-                                    <div class="line"></div>
-                                    <div class="footer-card">
-                                        <p><?php echo htmlspecialchars($lastArticle['author']); ?> - <?php echo $lastArticle['created_at']->toDateTime()->format('d F Y'); ?></p>
-                                        <div class="right">
-                                            <img src="../asset/icon/heart.svg" alt="" style="width: 20px; height: 20px; margin-right: 10px;">
-                                            <img src="../asset/icon/share.svg" alt="" style="width: 20px; height: 20px;">
+                            <div class="col-12 mb-4">
+                                <a href="../public/viewUser.php?id=<?php echo htmlspecialchars($lastArticle['_id']); ?>" class="text-decoration-none text-reset">
+                                    <div class="card">
+                                        <div class="main-news card-body" style="background-image: url(<?php echo htmlspecialchars($imgMain); ?>); background-size: cover; background-position: center; height: 300px; position: relative;">
+                                            <span class="badge bg-warning text-dark">Trending</span>
+                                            <div class="overlay" style="position: absolute; bottom: 0; background: rgba(0,0,0,0.5); width: 100%; color: white; padding: 10px;">
+                                                <p class="card-title"><?php echo htmlspecialchars($lastArticle['category']); ?></p>
+                                                <h5 class="card-text"><?php echo htmlspecialchars($lastArticle['title']); ?></h5>
+                                                <div class="line"></div>
+                                                <p><?php echo htmlspecialchars($lastArticle['author']); ?> - <?php echo $lastArticle['created_at']->toDateTime()->format('d F Y'); ?></p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                </a>
                             </div>
-                        </a>
-                        <?php
-
-                        $articles = $newsCollection->find([], ['limit' => 10, 'sort' => ['created_at' => -1]]);
-                        foreach ($articles as $article) {
-                            $imgCard = getImg($article);
-                        ?>
-                            <a class="col-12 col-md-6 col-lg-4 mt-3" href="view.php?id=<?php echo $article['_id']; ?>" style="color: inherit; text-decoration: none;"> <!-- Make it responsive -->
-                                <div class="card article-card">
-                                    <img src="<?php echo htmlspecialchars($imgCard); ?>" class="card-img-top" alt="Card image" style="height: 200px; object-fit: cover;"> <!-- Add the image -->
-                                    <div class="card-body">
-                                        <p class="group-card-category"><?php echo htmlspecialchars($article['category']); ?></p>
-                                        <p class="group-card-title"><?php echo htmlspecialchars($article['title']); ?></p>
-                                    </div>
-                                    <div class="card-footer d-flex justify-content-between align-items-center">
-                                        <span class="text-muted"><?php echo htmlspecialchars($article['author']); ?> - <?php echo $article['created_at']->toDateTime()->format('d F Y'); ?></span> <!-- Assuming there's an author -->
-                                        <div class="right">
-                                            <img src="../asset/icon/heart-black.svg" alt="ppp" style="width: 20px; height: 20px; margin-right: 10px;">
-                                            <img src="../asset/icon/share-black.svg" alt="ppp" style="width: 20px; height: 20px; margin-bottom: 2px;">
+                            <?php
+                            // Menampilkan 10 artikel terbaru
+                            $articles = $newsCollection->find([], ['limit' => 10, 'sort' => ['created_at' => -1]]);
+                            foreach ($articles as $article) {
+                                // Hindari duplikasi jika lastArticle termasuk dalam 10 artikel terbaru
+                                if ($article['_id'] == $lastArticle['_id']) {
+                                    continue;
+                                }
+                                $imgCard = getImg($article);
+                            ?>
+                                <div class="col-12 col-md-6 col-lg-4 mt-3">
+                                    <a href="../public/viewUser.php?id=<?php echo htmlspecialchars($article['_id']); ?>" style="color: inherit; text-decoration: none;">
+                                        <div class="card article-card">
+                                            <!-- <?php
+                                                // Cek apakah artikel ini adalah trending
+                                                $isTrending = false;
+                                                foreach ($topTrending as $trending) {
+                                                    if ($article['_id'] == $trending['_id']) {
+                                                        $isTrending = true;
+                                                        break;
+                                                    }
+                                                }
+                                            ?>
+                                            <?php if ($isTrending): ?>
+                                                <span class="badge bg-warning text-dark">Trending</span>
+                                            <?php endif; ?> -->
+                                            <img src="<?php echo htmlspecialchars($imgCard); ?>" class="card-img-top" alt="Card image" style="height: 200px; object-fit: cover;">
+                                            <div class="card-body">
+                                                <p class="group-card-category"><?php echo htmlspecialchars($article['category']); ?></p>
+                                                <p class="group-card-title"><?php echo htmlspecialchars($article['title']); ?></p>
+                                            </div>
+                                            <div class="card-footer d-flex justify-content-between align-items-center">
+                                                <span class="text-muted"><?php echo htmlspecialchars($article['author']); ?> - <?php echo $article['created_at']->toDateTime()->format('d F Y'); ?></span>
+                                                <div class="right">
+                                                    <img src="../asset/icon/heart-black.svg" alt="Like" style="width: 20px; height: 20px; margin-right: 10px;">
+                                                    <img src="../asset/icon/share-black.svg" alt="Share" style="width: 20px; height: 20px; margin-bottom: 2px;">
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </a>
                                 </div>
-                            </a>
                     <?php
+                            }
                         }
                     }
                     ?>
