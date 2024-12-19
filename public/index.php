@@ -137,7 +137,7 @@ if (!empty($searchQuery)) {
                 <div class="divider"></div>
             </li>
             <li><img src="../asset/icon/house.svg" alt=""><a href="#"><span>Home</span></a></li>
-            <li><img src="../asset/icon/sparkle.svg" alt=""><a href="#"><span>For You</span></a></li>
+            <!-- <li><img src="../asset/icon/sparkle.svg" alt=""><a href="#"><span>For You</span></a></li> -->
             <li><img src="../asset/icon/stack.svg" alt=""><a href="#"><span>Following</span></a></li>
             <li></li>
             <li><img src="../asset/icon/signIn.png" alt=""><a href="../admin/logout.php"><span>Log In/Sign In</span></a></li>
@@ -154,10 +154,6 @@ if (!empty($searchQuery)) {
             <div class="nav-btn-group">
                 <ul>
                     <li class="nav-btn active">Top Stories</li>
-                    <li class="nav-btn">For You</li>
-                    <li class="nav-btn">Your Topics</li>
-                    <li class="nav-btn">Fast Check</li>
-                    <li class="nav-btn">More</li>
                 </ul>
             </div>
             <div class="search-etc">

@@ -11,11 +11,17 @@ require '../includes/db.php'; // MongoDB connection
 
 // Fetch the article by ID
 if (isset($_GET['id'])) {
-    $articleId = new MongoDB\BSON\ObjectId($_GET['id']);
-    $article = $newsCollection->findOne(['_id' => $articleId]);
+    try {
+        $articleId = new MongoDB\BSON\ObjectId($_GET['id']);
+        $article = $newsCollection->findOne(['_id' => $articleId]);
 
-    if (!$article) {
-        $_SESSION['message'] = "Artikel tidak ditemukan.";
+        if (!$article) {
+            $_SESSION['message'] = "Artikel tidak ditemukan.";
+            header('Location: admin_dashboard.php');
+            exit;
+        }
+    } catch (Exception $e) {
+        $_SESSION['message'] = "ID artikel tidak valid.";
         header('Location: admin_dashboard.php');
         exit;
     }
@@ -24,6 +30,9 @@ if (isset($_GET['id'])) {
     header('Location: admin_dashboard.php');
     exit;
 }
+
+// Inisialisasi variabel untuk pesan error
+$error = '';
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -36,25 +45,68 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Validasi sederhana
     if ($title && $content && $summary && $author && $category) {
-        // Update the article
-        try {
-            $newsCollection->updateOne(
-                ['_id' => $articleId],
-                ['$set' => [
-                    'title' => $title,
-                    'content' => $content,
-                    'summary' => $summary,
-                    'author' => $author,
-                    'category' => $category,
-                    'updated_at' => new MongoDB\BSON\UTCDateTime()
-                ]]
-            );
+        // Persiapan untuk update data
+        $updateFields = [
+            'title' => $title,
+            'content' => $content,
+            'summary' => $summary,
+            'author' => $author,
+            'category' => $category,
+            'updated_at' => new MongoDB\BSON\UTCDateTime()
+        ];
 
-            $_SESSION['message'] = "Artikel berhasil diperbarui.";
-            header('Location: admin_dashboard.php');
-            exit;
-        } catch (Exception $e) {
-            $error = "Terjadi kesalahan: " . $e->getMessage();
+        // Cek apakah admin mengunggah gambar baru
+        if (isset($_FILES['image']) && $_FILES['image']['error'] !== UPLOAD_ERR_NO_FILE) {
+            // Validasi dan proses gambar
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+            if ($_FILES['image']['error'] === UPLOAD_ERR_OK) {
+                if (in_array($_FILES['image']['type'], $allowedTypes)) {
+                    // Tentukan direktori penyimpanan gambar
+                    $uploadDir = '../uploads/';
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+
+                    // Buat nama file unik
+                    $fileExt = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                    $fileName = uniqid() . '.' . $fileExt;
+                    $filePath = $uploadDir . $fileName;
+
+                    // Pindahkan file ke direktori tujuan
+                    if (move_uploaded_file($_FILES['image']['tmp_name'], $filePath)) {
+                        // Simpan path relatif gambar
+                        $imagePath = 'uploads/' . $fileName;
+                        $updateFields['image'] = $imagePath;
+
+                        // Hapus gambar lama jika ada dan bukan default
+                        if (!empty($article['image']) && file_exists('../' . $article['image'])) {
+                            unlink('../' . $article['image']);
+                        }
+                    } else {
+                        $error = "Gagal mengunggah gambar.";
+                    }
+                } else {
+                    $error = "Tipe file gambar tidak diperbolehkan.";
+                }
+            } else {
+                $error = "Terjadi kesalahan saat mengunggah gambar.";
+            }
+        }
+
+        if (empty($error)) {
+            // Update the article
+            try {
+                $newsCollection->updateOne(
+                    ['_id' => $articleId],
+                    ['$set' => $updateFields]
+                );
+
+                $_SESSION['message'] = "Artikel berhasil diperbarui.";
+                header('Location: admin_dashboard.php');
+                exit;
+            } catch (Exception $e) {
+                $error = "Terjadi kesalahan: " . $e->getMessage();
+            }
         }
     } else {
         $error = "Semua bidang wajib diisi.";
@@ -77,6 +129,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .container {
             max-width: 800px;
         }
+        .current-image {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
@@ -95,7 +152,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <h2>Edit Artikel</h2>
 
     <!-- Menampilkan Pesan Error jika Ada -->
-    <?php if (isset($error)): ?>
+    <?php if (!empty($error)): ?>
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
             <?php echo htmlspecialchars($error); ?>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Tutup"></button>
@@ -113,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     <?php endif; ?>
 
-    <form action="edit_article.php?id=<?php echo $article['_id']; ?>" method="POST">
+    <form action="edit_article.php?id=<?php echo $article['_id']; ?>" method="POST" enctype="multipart/form-data">
         <div class="mb-3">
             <label for="title" class="form-label">Judul</label>
             <input type="text" class="form-control" id="title" name="title" value="<?php echo htmlspecialchars($article['title']); ?>" required>
@@ -133,12 +190,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="mb-3">
             <label for="category" class="form-label">Kategori</label>
             <select class="form-select" id="category" name="category" required>
-                <option value="Politik" <?php echo ($article['category'] == 'Politics') ? 'selected' : ''; ?>>Politik</option>
-                <option value="Teknologi" <?php echo ($article['category'] == 'Technology') ? 'selected' : ''; ?>>Teknologi</option>
-                <option value="Olahraga" <?php echo ($article['category'] == 'Sports') ? 'selected' : ''; ?>>Olahraga</option>
+                <option value="">Pilih Kategori</option>
+                <option value="Politik" <?php echo ($article['category'] == 'Politik') ? 'selected' : ''; ?>>Politik</option>
+                <option value="Teknologi" <?php echo ($article['category'] == 'Teknologi') ? 'selected' : ''; ?>>Teknologi</option>
+                <option value="Olahraga" <?php echo ($article['category'] == 'Olahraga') ? 'selected' : ''; ?>>Olahraga</option>
                 <!-- Tambahkan kategori lain sesuai kebutuhan -->
             </select>
         </div>
+
+        <!-- Menampilkan Gambar Saat Ini -->
+        <?php if (!empty($article['image'])): ?>
+            <div class="mb-3">
+                <label class="form-label">Gambar Saat Ini:</label><br>
+                <img src="../<?php echo htmlspecialchars($article['image']); ?>" alt="Gambar Artikel" class="current-image">
+            </div>
+        <?php endif; ?>
+
+        <!-- Input Gambar Opsional -->
+        <div class="mb-3">
+            <label for="image" class="form-label">Ganti Gambar (Opsional)</label>
+            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+            <div class="form-text">Biarkan kosong jika tidak ingin mengganti gambar.</div>
+        </div>
+
         <button type="submit" class="btn btn-warning">Perbarui Artikel</button>
         <a href="admin_dashboard.php" class="btn btn-secondary">Kembali</a>
     </form>
@@ -149,3 +223,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 </body>
 </html>
+s
